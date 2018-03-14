@@ -22,42 +22,24 @@
  * SOFTWARE.
  */
 
-package com.nekomatic.ironik.core
+package com.nekomatic.ironik.core.combinators
 
-import com.nekomatic.types.Option
+import com.nekomatic.ironik.core.IInput
+import com.nekomatic.ironik.core.ParserResult
+import com.nekomatic.ironik.core.parsers.Parser
 
-class Input<TStreamItem : Any>(private val input: List<TStreamItem>, private val index: Int = 0, private val l: Int = 0, private val c: Int = 0) : IInput<TStreamItem> {
-    companion object {
-        fun <T : Any> create(input: List<T>) = Input(input)
-    }
-
-    override fun hasNext(): Boolean = index < input.size
-
-    override val item: Option<TStreamItem>
-        get() =
-            if (index >= input.size)
-                Option.None
-            else
-                Option.Some(input[index])
-
-    override fun next(): Input<TStreamItem> =
-            if (index >= input.size)
-                this
-            else
-                Input(this.input, index + 1, line, column + 1)
-
-    override fun nextLine(): Input<TStreamItem> =
-            if (index >= input.size)
-                this
-            else
-                Input(this.input, index + 1, line + 1, 0)
-
-    override val position: Int
-        get() = index
-
-    override val line: Int
-        get() = l
-
-    override val column: Int
-        get() = c
-}
+infix fun <TA : Any, TB : Any, TStreamItem : Any> Parser<TA, TStreamItem>.mapValue(map: (TA) -> TB) =
+        Parser<TB, TStreamItem>(this.name)
+        { input: IInput<TStreamItem> ->
+            val resultA = this.parse(input)
+            when (resultA) {
+                is ParserResult.Success -> ParserResult.Success(
+                        expected = this.name,
+                        value = map(resultA.value),
+                        remainingInput = resultA.remainingInput,
+                        payload = resultA.payload,
+                        position = input.position
+                )
+                is ParserResult.Failure -> resultA
+            }
+        }

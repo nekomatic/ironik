@@ -1,4 +1,4 @@
-/*
+/**
  * MIT License
  *
  * Copyright (c) 2018 nekomatic
@@ -20,13 +20,15 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package com.nekomatic.ironik.charparser
+package com.nekomatic.ironik.core.combinators
 
-import com.nekomatic.ironik.core.IParser
-import com.nekomatic.ironik.core.ParserResult
+import com.nekomatic.ironik.core.parsers.Parser
 
-interface ICharParser<out T : Any> : IParser<T, Char> {
-}
+fun < T:Any, TStreamItem:Any> List<Parser<T, TStreamItem>>.sequence() = sequenceOf(*(this.toTypedArray()))
+//TODO: migrate from kombiparser fun <T:Any, TStreamElement:Any> Parser<T, TStreamElement>.starRule() = zeroOrMore(this)
+//TODO: migrate from kombiparser fun <T:Any, TStreamElement:Any> Parser<T, TStreamElement>.plusRule() = oneOrMore(this)
+//TODO: migrate from kombiparser fun <T:Any, TStreamElement:Any> Parser<T, TStreamElement>.optional() = option(this)
+
+

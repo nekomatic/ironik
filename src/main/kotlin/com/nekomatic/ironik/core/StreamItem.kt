@@ -24,8 +24,10 @@
 
 package com.nekomatic.ironik.core
 
-sealed class InputItem<out TStreamElement : Any> {
-    object EOL : InputItem<Nothing>()
-    object EOF : InputItem<Nothing>()
-    data class Some<out TStreamElement : Any>(val value: TStreamElement) : InputItem<TStreamElement>()
+sealed class StreamItem<out TStreamElement : Any> {
+    sealed class End<out TStreamElement : Any>{
+        object OfLine : End<Nothing>()
+        object OfFile : End<Nothing>()
+    }
+    data class Some<out TStreamItem : Any>(val value: TStreamItem) : StreamItem<TStreamItem>()
 }

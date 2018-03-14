@@ -24,8 +24,7 @@
 
 package com.nekomatic.ironik.core
 
-import com.nekomatic.ironik.charparser.CharInput
-
-interface IParser<out T : Any, TStreamElement : Any> {
-    fun parse(input: IInput<TStreamElement>): ParserResult<T, TStreamElement>
+interface IParser<out T : Any, TStreamItem : Any> {
+    val name: String
+    fun parse(input: IInput<TStreamItem>): ParserResult<T, TStreamItem>
 }

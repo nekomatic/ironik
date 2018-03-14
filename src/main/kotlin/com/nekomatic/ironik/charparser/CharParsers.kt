@@ -25,12 +25,27 @@
 
 package com.nekomatic.ironik.charparser
 
-import com.nekomatic.ironik.core.IInput
-import com.nekomatic.ironik.core.ParserResult
+import com.nekomatic.ironik.core.combinators.mapValue
+import com.nekomatic.ironik.core.combinators.renameTo
+import com.nekomatic.ironik.core.combinators.sequence
+import com.nekomatic.ironik.core.createParser
+import com.nekomatic.ironik.core.parsers.Parser
 
-class CharParser<out T : Any> : ICharParser<T> {
 
-    override fun parse(input: IInput<Char>): ParserResult<T, Char> {
-        TODO("not implemented")
-    }
-}
+fun createCharParser(expected: String, match: (Char) -> Boolean) = createParser(expected, match)
+
+
+fun char(char: Char) = createCharParser(char.toString()) { c -> c == char }
+fun string(value: String): Parser<String, Char> =
+        value.toList()
+                .map { char(it) }
+                .sequence()
+                .renameTo(value)
+                .mapValue { it.joinToString("") }
+
+val digit by lazy { createCharParser("[0-9]", { it.isDigit() }) }
+val lowercase by lazy { createCharParser("[a-z]", { it.isLowerCase() }) }
+val uppercase by lazy { createCharParser("[A-Z]", { it.isUpperCase() }) }
+val letter by lazy { createCharParser("[a-zA-Z]", { it.isLetter() }) }
+val letterOrDigit by lazy { createCharParser("[a-zA-Z0-9]", { it.isLetterOrDigit() }) }
+val whitespace by lazy { createCharParser("whitespace") { it.isWhitespace() } }

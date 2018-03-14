@@ -26,8 +26,9 @@
 package com.nekomatic.ironik.charparser
 
 import com.nekomatic.ironik.core.IInput
-import com.nekomatic.ironik.core.InputItem
+import com.nekomatic.types.Option
 
+//TODO merge with the generic input.
 class CharInput(private val input: CharSequence, private val index: Int = 0, private val l: Int = 0, private val c: Int = 0) : IInput<Char> {
     companion object {
         fun create(input: CharSequence) = CharInput(input)
@@ -35,12 +36,12 @@ class CharInput(private val input: CharSequence, private val index: Int = 0, pri
 
     override fun hasNext(): Boolean = index < input.length
 
-    override val item: InputItem<Char>
+    override val item: Option<Char>
         get() =
             if (index >= input.length)
-                InputItem.EOF
+                Option.None
             else
-                InputItem.Some(input[index])
+                Option.Some(input[index])
 
     override fun next(): CharInput =
             if (index >= input.length)

@@ -24,11 +24,13 @@
 
 package com.nekomatic.ironik.core
 
+import com.nekomatic.types.Option
 
-interface IInput<T> : Iterator<IInput<T>> where T : Any {
-    val item: InputItem<T>
+
+interface IInput<TStreamItem> : Iterator<IInput<TStreamItem>> where TStreamItem : Any {
+    val item: Option<TStreamItem>
     val position: Int
     val line: Int
     val column: Int
-    fun nextLine(): IInput<T>
+    fun nextLine(): IInput<TStreamItem>
 }
