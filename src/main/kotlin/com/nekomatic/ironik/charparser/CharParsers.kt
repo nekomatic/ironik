@@ -31,9 +31,8 @@ import com.nekomatic.ironik.core.combinators.sequence
 import com.nekomatic.ironik.core.createParser
 import com.nekomatic.ironik.core.parsers.Parser
 
-
+//TODO: Add JSON specific text char parsers
 fun createCharParser(expected: String, match: (Char) -> Boolean) = createParser(expected, match)
-
 
 fun char(char: Char) = createCharParser(char.toString()) { c -> c == char }
 fun string(value: String): Parser<String, Char> =

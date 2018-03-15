@@ -6,7 +6,7 @@ import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.StreamItem
 import com.nekomatic.types.Option
 
-class EofParser<out T : Any, TStreamItem : Any>() : IParser<StreamItem.End.OfFile, TStreamItem> {
+class EofParser<out T : Any, TStreamItem : Any> : IParser<StreamItem.End.OfFile, TStreamItem> {
     override val name: String by lazy { "eof" }
     override fun parse(input: IInput<TStreamItem>): ParserResult<StreamItem.End.OfFile, TStreamItem> =
             when (input.item) {

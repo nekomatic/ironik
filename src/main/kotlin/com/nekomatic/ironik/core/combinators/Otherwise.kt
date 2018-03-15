@@ -4,21 +4,20 @@ import com.nekomatic.ironik.core.IInput
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 
-infix fun <T : Any, TStreamItem : Any> Parser<T, TStreamItem>.otherwise(second: Parser<T, TStreamItem>): Parser<T, TStreamItem> {
-    val p1 = this
-    return Parser("${this.name} otherwise ${second.name} ",
-            fun(input: IInput<TStreamItem>): ParserResult<T, TStreamItem> {
-
-                val resultA = p1.parse(input)
-
+infix fun <T : Any, TStreamItem : Any> Parser<T, TStreamItem>.otherwise(that: Parser<T, TStreamItem>): Parser<T, TStreamItem> {
+    val name = "${this.name} otherwise ${that.name}"
+    return Parser(
+            name = name,
+            parseFunction = fun(input: IInput<TStreamItem>): ParserResult<T, TStreamItem> {
+                val resultA = this.parse(input)
                 return when (resultA) {
                     is ParserResult.Success -> resultA
                     is ParserResult.Failure -> {
-                        val resultB = second.parse(input)
+                        val resultB = that.parse(input)
                         when (resultB) {
                             is ParserResult.Success -> resultB
                             is ParserResult.Failure -> ParserResult.Failure(
-                                    expected = resultA.expected + " orElse " + resultB.expected,
+                                    expected = name,
                                     position = input.position
                             )
                         }

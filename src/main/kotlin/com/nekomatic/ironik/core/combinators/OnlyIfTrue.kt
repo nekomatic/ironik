@@ -4,22 +4,23 @@ import com.nekomatic.ironik.core.IInput
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 
-infix fun <T : Any, TStreamElement : Any> Parser<T, TStreamElement>.onlyIfTrue(predicate: (T) -> Boolean) =
-        Parser("${this.name} only if Match",
-                fun(input: IInput<TStreamElement>): ParserResult<T, TStreamElement> {
-
-                    val resultA = this.parse(input)
-                    return when (resultA) {
-                        is ParserResult.Failure -> resultA
-                        is ParserResult.Success -> {
-
-                            when (predicate(resultA.value)) {
-                                true -> resultA
-                                false -> ParserResult.Failure(
-                                        expected = "${this.name} only if Match",
-                                        position = input.position
-                                )
-                            }
+infix fun <T : Any, TStreamItem : Any> Parser<T, TStreamItem>.onlyIfTrue(predicate: (T) -> Boolean): Parser<T, TStreamItem> {
+    val name = "${this.name} only if Match"
+    return Parser(
+            name = name,
+            parseFunction = fun(input: IInput<TStreamItem>): ParserResult<T, TStreamItem> {
+                val resultA = this.parse(input)
+                return when (resultA) {
+                    is ParserResult.Failure -> resultA
+                    is ParserResult.Success -> {
+                        when (predicate(resultA.value)) {
+                            true -> resultA
+                            false -> ParserResult.Failure(
+                                    expected = name,
+                                    position = input.position
+                            )
                         }
                     }
-                })
+                }
+            })
+}

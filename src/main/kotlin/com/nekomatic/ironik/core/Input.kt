@@ -26,6 +26,7 @@ package com.nekomatic.ironik.core
 
 import com.nekomatic.types.Option
 
+
 class Input<TStreamItem : Any>(private val input: List<TStreamItem>, private val index: Int = 0, private val l: Int = 0, private val c: Int = 0) : IInput<TStreamItem> {
     companion object {
         fun <T : Any> create(input: List<T>) = Input(input)

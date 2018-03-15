@@ -26,5 +26,8 @@ package com.nekomatic.ironik.core.combinators
 
 import com.nekomatic.ironik.core.parsers.Parser
 
-infix fun <T : Any, TStreamElement : Any> Parser<T, TStreamElement>.renameTo(newName: String) =
-        Parser<T, TStreamElement>(newName, this.parseFunction)
+infix fun <T : Any, TStreamItem : Any> Parser<T, TStreamItem>.renameTo(newName: String): Parser<T, TStreamItem> =
+        Parser<T, TStreamItem>(
+                name = newName,
+                parseFunction = this.parseFunction
+        )

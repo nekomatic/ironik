@@ -163,6 +163,4 @@ $RECYCLE.BIN/
 *.lnk
 .idea
 parser.iml
-target/classes/META-INF/
-
 target/
