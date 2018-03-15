@@ -9,3 +9,6 @@ fun <T1 : Any, T2 : Any, T3 : Any, TStreamElement : Any> Parser<T1, TStreamEleme
         Parser("${this.name} then ${second.name}",
                 fun(input: IInput<TStreamElement>): ParserResult<T3, TStreamElement> =
                         this.parse(input).chain(second) { t1, t2 -> func(t1, t2) })
+
+infix fun <T01 : Any, T02 : Any, TStreamItem : Any> Parser<T01, TStreamItem>.then(second: Parser<T02, TStreamItem>) =
+        this.then(second) { v1, v2 -> com.nekomatic.types.Tuple02(v1, v2) } 
