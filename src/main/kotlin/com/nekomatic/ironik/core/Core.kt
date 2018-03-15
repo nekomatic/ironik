@@ -34,3 +34,21 @@ fun <TStreamItem : Any> createParser(name: String, match: (TStreamItem) -> Boole
         }
     }
 }
+
+fun <T1 : Any, T2 : Any, T3 : Any, TStreamItem : Any> ParserResult<T1, TStreamItem>.chain(parser: Parser<T2, TStreamItem>, func: (T1, T2) -> T3) : ParserResult<T3, TStreamItem> =
+        when (this) {
+            is ParserResult.Failure -> this
+            is ParserResult.Success -> {
+                val result = parser.parse(this.remainingInput)
+                when (result) {
+                    is ParserResult.Success -> ParserResult.Success(
+                            expected = "${this.expected} then ${parser.name}",
+                            value = func(this.value, result.value),
+                            remainingInput = result.remainingInput,
+                            payload = this.payload + result.payload,
+                            position = this.position
+                    )
+                    is ParserResult.Failure -> result
+                }
+            }
+        }
