@@ -25,9 +25,7 @@
 
 package com.nekomatic.ironik.charparser
 
-import com.nekomatic.ironik.core.combinators.mapValue
-import com.nekomatic.ironik.core.combinators.renameTo
-import com.nekomatic.ironik.core.combinators.sequence
+import com.nekomatic.ironik.core.combinators.*
 import com.nekomatic.ironik.core.createParser
 import com.nekomatic.ironik.core.parsers.Parser
 
@@ -35,6 +33,8 @@ import com.nekomatic.ironik.core.parsers.Parser
 fun createCharParser(expected: String, match: (Char) -> Boolean) = createParser(expected, match)
 
 fun char(char: Char) = createCharParser(char.toString()) { c -> c == char }
+fun <T : Any> anyCharExcluding(parser: Parser<T, Char>): Parser<T, Char> = anythingBut(parser)
+fun <T : Any> Parser<T, Char>.token(): Parser<T,Char> = this surroundedBy optionalWhitespaces
 fun string(value: String): Parser<String, Char> =
         value.toList()
                 .map { char(it) }
@@ -48,3 +48,7 @@ val uppercase by lazy { createCharParser("[A-Z]", { it.isUpperCase() }) }
 val letter by lazy { createCharParser("[a-zA-Z]", { it.isLetter() }) }
 val letterOrDigit by lazy { createCharParser("[a-zA-Z0-9]", { it.isLetterOrDigit() }) }
 val whitespace by lazy { createCharParser("whitespace") { it.isWhitespace() } }
+
+
+val whitespaces: Parser<List<Char>, Char> by lazy { whitespace.plusRule() }
+val optionalWhitespaces: Parser<List<Char>, Char>by lazy { whitespace.starRule() }
