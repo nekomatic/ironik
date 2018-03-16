@@ -24,10 +24,28 @@
 
 package com.nekomatic.ironik.core.combinators
 
+import com.nekomatic.ironik.core.IInput
+import com.nekomatic.ironik.core.IParser
+import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 
-infix fun <T : Any, TStreamItem : Any> Parser<T, TStreamItem>.renameTo(newName: String): Parser<T, TStreamItem> =
+infix fun <T : Any, TStreamItem : Any> IParser<T, TStreamItem>.renameTo(newName: String): IParser<T, TStreamItem> =
         Parser<T, TStreamItem>(
                 name = newName,
-                parseFunction = this.parseFunction
+                parseFunction = fun(input: IInput<TStreamItem>): ParserResult<T, TStreamItem> {
+                        val resultA = this.parse(input)
+                        return when (resultA) {
+                                is ParserResult.Failure -> ParserResult.Failure(
+                                        expected= newName,
+                                        position = input.position
+                                )
+                                is ParserResult.Success -> ParserResult.Success(
+                                        expected = newName,
+                                        position = resultA.position,
+                                        payload = resultA.payload,
+                                        remainingInput = resultA.remainingInput,
+                                        value = resultA.value
+                                )
+                        }
+                }
         )

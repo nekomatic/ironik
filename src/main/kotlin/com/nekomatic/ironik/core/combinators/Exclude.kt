@@ -1,10 +1,11 @@
 package com.nekomatic.ironik.core.combinators
 
 import com.nekomatic.ironik.core.IInput
+import com.nekomatic.ironik.core.IParser
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 
-fun <T : Any, TStreamItem : Any> anythingBut(parser: Parser<T, TStreamItem>): Parser<T, TStreamItem> {
+fun <T : Any, TStreamItem : Any> anythingBut(parser: IParser<T, TStreamItem>): IParser<TStreamItem, TStreamItem> {
     val name = "Anything which is not ${parser.name}"
     return Parser(
             name = name,

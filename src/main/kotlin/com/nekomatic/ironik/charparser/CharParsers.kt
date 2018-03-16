@@ -25,17 +25,16 @@
 
 package com.nekomatic.ironik.charparser
 
+import com.nekomatic.ironik.core.IParser
 import com.nekomatic.ironik.core.combinators.*
 import com.nekomatic.ironik.core.createParser
-import com.nekomatic.ironik.core.parsers.Parser
 
-//TODO: Add JSON specific text char parsers
 fun createCharParser(expected: String, match: (Char) -> Boolean) = createParser(expected, match)
 
 fun char(char: Char) = createCharParser(char.toString()) { c -> c == char }
-fun <T : Any> anyCharExcluding(parser: Parser<T, Char>): Parser<T, Char> = anythingBut(parser)
-fun <T : Any> Parser<T, Char>.token(): Parser<T,Char> = this surroundedBy optionalWhitespaces
-fun string(value: String): Parser<String, Char> =
+fun <T : Any> anyCharExcluding(parser: IParser<T, Char>): IParser<Char, Char> = anythingBut(parser)
+fun <T : Any> IParser<T, Char>.token(): IParser<T,Char> = this surroundedBy optionalWhitespaces
+fun string(value: String): IParser<String, Char> =
         value.toList()
                 .map { char(it) }
                 .sequence()
@@ -50,5 +49,7 @@ val letterOrDigit by lazy { createCharParser("[a-zA-Z0-9]", { it.isLetterOrDigit
 val whitespace by lazy { createCharParser("whitespace") { it.isWhitespace() } }
 
 
-val whitespaces: Parser<List<Char>, Char> by lazy { whitespace.plusRule() }
-val optionalWhitespaces: Parser<List<Char>, Char>by lazy { whitespace.starRule() }
+val whitespaces: IParser<List<Char>, Char> by lazy { whitespace.plusRule() }
+val optionalWhitespaces: IParser<List<Char>, Char>by lazy { whitespace.starRule() }
+//TODO: replace with more elegant and efficient implementation
+val hexDigitAsInt: IParser<Int,Char> = createCharParser("[a-fA-F0-9]") { "0123456789abcdef".contains(it, true) } mapValue { "0123456789abcdef".indexOf(it, 0, true) }

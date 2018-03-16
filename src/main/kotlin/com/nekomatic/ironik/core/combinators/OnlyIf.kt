@@ -1,11 +1,12 @@
 package com.nekomatic.ironik.core.combinators
 
 import com.nekomatic.ironik.core.IInput
+import com.nekomatic.ironik.core.IParser
 import com.nekomatic.ironik.core.Input
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 
-infix fun <T : Any, TStreamItem : Any> Parser<T, TStreamItem>.onlyIf(condition: Parser<T, TStreamItem>): Parser<T, TStreamItem> {
+infix fun <T : Any, TStreamItem : Any> IParser<T, TStreamItem>.onlyIf(condition: IParser<T, TStreamItem>): IParser<T, TStreamItem> {
     val name = "${this.name} only if ${condition.name}"
     return Parser(
             name = name,

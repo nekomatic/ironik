@@ -5,7 +5,7 @@ import com.nekomatic.types.Option
 
 typealias genericParser<T, TStreamItem> = (IInput<TStreamItem>) -> ParserResult<T, TStreamItem>
 
-fun <TStreamItem : Any> createParser(name: String, match: (TStreamItem) -> Boolean): Parser<TStreamItem, TStreamItem> {
+fun <TStreamItem : Any> createParser(name: String, match: (TStreamItem) -> Boolean): IParser<TStreamItem, TStreamItem> {
     return Parser(name) { input: IInput<TStreamItem> ->
         val currentItem: Option<TStreamItem> = input.item
         when (currentItem) {
@@ -35,7 +35,7 @@ fun <TStreamItem : Any> createParser(name: String, match: (TStreamItem) -> Boole
     }
 }
 
-fun <T1 : Any, T2 : Any, T3 : Any, TStreamItem : Any> ParserResult<T1, TStreamItem>.chain(parser: Parser<T2, TStreamItem>, func: (T1, T2) -> T3) : ParserResult<T3, TStreamItem> =
+fun <T1 : Any, T2 : Any, T3 : Any, TStreamItem : Any> ParserResult<T1, TStreamItem>.chain(parser: IParser<T2, TStreamItem>, func: (T1, T2) -> T3) : ParserResult<T3, TStreamItem> =
         when (this) {
             is ParserResult.Failure -> this
             is ParserResult.Success -> {

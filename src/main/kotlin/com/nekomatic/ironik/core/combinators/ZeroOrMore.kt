@@ -1,10 +1,11 @@
 package com.nekomatic.ironik.core.combinators
 
 import com.nekomatic.ironik.core.IInput
+import com.nekomatic.ironik.core.IParser
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 
-fun <T : Any, TStreamItem : Any> zeroOrMore(parser: Parser<T, TStreamItem>): Parser<List<T>, TStreamItem> {
+fun <T : Any, TStreamItem : Any> zeroOrMore(parser: IParser<T, TStreamItem>): IParser<List<T>, TStreamItem> {
     val name = "zero or more of ${parser.name}"
     return Parser(
             name = name,

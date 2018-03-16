@@ -1,10 +1,11 @@
 package com.nekomatic.ironik.core.combinators
 
 import com.nekomatic.ironik.core.IInput
+import com.nekomatic.ironik.core.IParser
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 
-infix fun <TA : Any, TB : Any, TStreamItem : Any> Parser<TA, TStreamItem>.toConst(const: TB): Parser<TB, TStreamItem> {
+infix fun <TA : Any, TB : Any, TStreamItem : Any> IParser<TA, TStreamItem>.toConst(const: TB): IParser<TB, TStreamItem> {
     return Parser(
             name = this.name,
             parseFunction = { input: IInput<TStreamItem> ->

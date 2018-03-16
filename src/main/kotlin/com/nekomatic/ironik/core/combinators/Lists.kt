@@ -1,11 +1,12 @@
 package com.nekomatic.ironik.core.combinators
 
 import com.nekomatic.ironik.core.IInput
+import com.nekomatic.ironik.core.IParser
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 
 
-infix fun <T : Any, TStreamItem : Any> Parser<T, TStreamItem>.join(second: Parser<T, TStreamItem>):  Parser<List<T>, TStreamItem> {
+infix fun <T : Any, TStreamItem : Any> IParser<T, TStreamItem>.join(second: IParser<T, TStreamItem>):  IParser<List<T>, TStreamItem> {
     return Parser(name = "",
             parseFunction = fun(input: IInput<TStreamItem>): ParserResult<List<T>, TStreamItem> {
                 val resultA = this.parse(input)
@@ -28,5 +29,5 @@ infix fun <T : Any, TStreamItem : Any> Parser<T, TStreamItem>.join(second: Parse
             })
 }
 
-infix fun <T1 : Any, T2 : Any, TStreamItem : Any> Parser<T1, TStreamItem>.listOfSeparatedBy(separator: Parser<T2, TStreamItem>) =
+infix fun <T1 : Any, T2 : Any, TStreamItem : Any> IParser<T1, TStreamItem>.listOfSeparatedBy(separator: IParser<T2, TStreamItem>) =
         (this.mapValue { listOf(it) } join zeroOrMore(this prefixedBy separator)).mapValue { it.flatten() }

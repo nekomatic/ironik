@@ -25,11 +25,12 @@
 package com.nekomatic.ironik.core.combinators
 
 import com.nekomatic.ironik.core.IInput
+import com.nekomatic.ironik.core.IParser
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 import com.nekomatic.types.PositiveInt
 
-fun <T : Any, TStreamItem : Any> sequenceOf(vararg parsers: Parser<T, TStreamItem>): Parser<List<T>, TStreamItem> {
+fun <T : Any, TStreamItem : Any> sequenceOf(vararg parsers: IParser<T, TStreamItem>): IParser<List<T>, TStreamItem> {
     val name = "sequence of: ${parsers.map { r -> r.name }.joinToString { ", " }}"
     return Parser<List<T>, TStreamItem>(
             name = name,
@@ -56,17 +57,17 @@ fun <T : Any, TStreamItem : Any> sequenceOf(vararg parsers: Parser<T, TStreamIte
     )
 }
 
-fun <T : Any, TStreamElement : Any> numberOf(parser: Parser<T, TStreamElement>, count: PositiveInt) =
+fun <T : Any, TStreamElement : Any> numberOf(parser: IParser<T, TStreamElement>, count: PositiveInt) =
         sequenceOf(*Array(count.value, { parser }))
 
-fun <T : Any, TStreamElement : Any> Parser<T, TStreamElement>.count(count: PositiveInt) =
+fun <T : Any, TStreamElement : Any> IParser<T, TStreamElement>.count(count: PositiveInt) =
         numberOf(this, count)
 
-fun <T : Any, TStreamElement : Any> twoOf(parser: Parser<T, TStreamElement>) =
+fun <T : Any, TStreamElement : Any> twoOf(parser: IParser<T, TStreamElement>) =
         sequenceOf(*Array(2, { parser }))
 
-fun <T : Any, TStreamElement : Any> threeOf(parser: Parser<T, TStreamElement>) =
+fun <T : Any, TStreamElement : Any> threeOf(parser: IParser<T, TStreamElement>) =
         sequenceOf(*Array(3, { parser }))
 
-fun <T : Any, TStreamElement : Any> fourOf(parser: Parser<T, TStreamElement>) =
+fun <T : Any, TStreamElement : Any> fourOf(parser: IParser<T, TStreamElement>) =
         sequenceOf(*Array(4, { parser }))

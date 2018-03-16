@@ -25,10 +25,11 @@
 package com.nekomatic.ironik.core.combinators
 
 import com.nekomatic.ironik.core.IInput
+import com.nekomatic.ironik.core.IParser
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 
-infix fun <TA : Any, TB : Any, TStreamItem : Any> Parser<TA, TStreamItem>.mapValue(map: (TA) -> TB): Parser<TB, TStreamItem> {
+infix fun <TA : Any, TB : Any, TStreamItem : Any> IParser<TA, TStreamItem>.mapValue(map: (TA) -> TB): IParser<TB, TStreamItem> {
     return Parser<TB, TStreamItem>(
             name = this.name,
             parseFunction = { input: IInput<TStreamItem> ->

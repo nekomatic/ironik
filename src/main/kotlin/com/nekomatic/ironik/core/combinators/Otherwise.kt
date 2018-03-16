@@ -1,10 +1,11 @@
 package com.nekomatic.ironik.core.combinators
 
 import com.nekomatic.ironik.core.IInput
+import com.nekomatic.ironik.core.IParser
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 
-infix fun <T : Any, TStreamItem : Any> Parser<T, TStreamItem>.otherwise(that: Parser<T, TStreamItem>): Parser<T, TStreamItem> {
+infix fun <T : Any, TStreamItem : Any> IParser<T, TStreamItem>.otherwise(that: IParser<T, TStreamItem>): IParser<T, TStreamItem> {
     val name = "${this.name} otherwise ${that.name}"
     return Parser(
             name = name,
