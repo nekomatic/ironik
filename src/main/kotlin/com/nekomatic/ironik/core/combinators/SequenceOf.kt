@@ -30,32 +30,28 @@ import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 import com.nekomatic.types.PositiveInt
 
-fun <T : Any, TStreamItem : Any> sequenceOf(vararg parsers: IParser<T, TStreamItem>): IParser<List<T>, TStreamItem> {
-    val name = "sequence of: ${parsers.map { r -> r.name }.joinToString { ", " }}"
-    return Parser<List<T>, TStreamItem>(
-            name = name,
-            parseFunction = { input: IInput<TStreamItem> ->
-                val iterator = parsers.iterator()
-                tailrec fun parseNext(currentInput: IInput<TStreamItem>, accumulatorList: List<ParserResult.Success<T, TStreamItem>> = listOf()): ParserResult<List<T>, TStreamItem> {
-                    return if (iterator.hasNext()) {
-                        val result = iterator.next().parse(currentInput)
-                        when (result) {
-                            is ParserResult.Failure -> result
-                            is ParserResult.Success -> parseNext(result.remainingInput, accumulatorList + result)
-                        }
-                    } else
-                        ParserResult.Success(
-                                expected = name,
-                                value = accumulatorList.map { r -> r.value },
-                                remainingInput = currentInput,
-                                payload = accumulatorList.map { r -> r.payload }.reduce({ a, b -> a + b }),
-                                position = input.position
-                        )
+fun <T : Any, TStreamItem : Any> sequenceOf(vararg parsers: IParser<T, TStreamItem>): IParser<List<T>, TStreamItem> =
+        Parser(
+                { input: IInput<TStreamItem> ->
+                    val iterator = parsers.iterator()
+                    tailrec fun parseNext(currentInput: IInput<TStreamItem>, accumulatorList: List<ParserResult.Success<T, TStreamItem>> = listOf()): ParserResult<List<T>, TStreamItem> {
+                        return if (iterator.hasNext()) {
+                            val result = iterator.next().parse(currentInput)
+                            when (result) {
+                                is ParserResult.Failure -> result
+                                is ParserResult.Success -> parseNext(result.remainingInput, accumulatorList + result)
+                            }
+                        } else
+                            ParserResult.Success(
+                                    value = accumulatorList.map { r -> r.value },
+                                    remainingInput = currentInput,
+                                    payload = accumulatorList.map { r -> r.payload }.reduce({ a, b -> a + b }),
+                                    position = input.position
+                            )
+                    }
+                    parseNext(input)
                 }
-                parseNext(input)
-            }
-    )
-}
+        )
 
 fun <T : Any, TStreamElement : Any> numberOf(parser: IParser<T, TStreamElement>, count: PositiveInt) =
         sequenceOf(*Array(count.value, { parser }))

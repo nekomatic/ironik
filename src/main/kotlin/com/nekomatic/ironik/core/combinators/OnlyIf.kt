@@ -6,29 +6,26 @@ import com.nekomatic.ironik.core.Input
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 
-infix fun <T : Any, TStreamItem : Any> IParser<T, TStreamItem>.onlyIf(condition: IParser<T, TStreamItem>): IParser<T, TStreamItem> {
-    val name = "${this.name} only if ${condition.name}"
-    return Parser(
-            name = name,
-            parseFunction = fun(input: IInput<TStreamItem>): ParserResult<T, TStreamItem> {
-                val resultA = this.parse(input)
-                return when (resultA) {
-                    is ParserResult.Failure -> ParserResult.Failure(
-                            expected = name,
-                            position = resultA.position
-                    )
-                    is ParserResult.Success -> {
-                        val newInput = Input(resultA.payload, 0)
-
-                        val resultB = condition.parse(newInput)
-                        when (resultB) {
-                            is ParserResult.Success -> resultA
-                            is ParserResult.Failure -> ParserResult.Failure(
-                                    expected = name,
-                                    position = input.position
-                            )
+fun <T : Any, TStreamItem : Any> IParser<T, TStreamItem>.onlyIf(name: String, condition: IParser<T, TStreamItem>): IParser<T, TStreamItem> =
+        Parser(
+                fun(input: IInput<TStreamItem>): ParserResult<T, TStreamItem> {
+                    val thisResult = this.parse(input)
+                    return when (thisResult) {
+                        is ParserResult.Failure -> ParserResult.Failure(
+                                expected = name,
+                                position = thisResult.position
+                        )
+                        is ParserResult.Success -> {
+                            val newInput = Input(thisResult.payload, 0)
+                            val resultB = condition.parse(newInput)
+                            when (resultB) {
+                                is ParserResult.Success -> thisResult
+                                is ParserResult.Failure -> ParserResult.Failure(
+                                        expected = name,
+                                        position = input.position
+                                )
+                            }
                         }
                     }
                 }
-            })
-}
+        )

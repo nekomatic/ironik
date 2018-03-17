@@ -24,20 +24,16 @@
 
 package com.nekomatic.ironik.core
 
-sealed class ParserResult<out T : Any, out TStreamItem : Any>(private val name: String) {
-
-    open val expected: String  by lazy { name }
-
+sealed class ParserResult<out T : Any, out TStreamItem : Any>() {
     data class Success<out T : Any, TStreamItem : Any>(
-            override val expected: String,
             val value: T,
             val remainingInput: IInput<TStreamItem>,
             val payload: List<TStreamItem>,
             val position: Int
-    ) : ParserResult<T, TStreamItem>(expected)
+    ) : ParserResult<T, TStreamItem>()
 
     data class Failure<out TStreamItem : Any>(
-            override val expected: String,
+            val expected: String,
             val position: Int
-    ) : ParserResult<Nothing, TStreamItem>(expected)
+    ) : ParserResult<Nothing, TStreamItem>()
 }

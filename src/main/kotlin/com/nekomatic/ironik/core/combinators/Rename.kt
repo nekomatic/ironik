@@ -30,22 +30,20 @@ import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 
 infix fun <T : Any, TStreamItem : Any> IParser<T, TStreamItem>.renameTo(newName: String): IParser<T, TStreamItem> =
-        Parser<T, TStreamItem>(
-                name = newName,
-                parseFunction = fun(input: IInput<TStreamItem>): ParserResult<T, TStreamItem> {
-                        val resultA = this.parse(input)
-                        return when (resultA) {
-                                is ParserResult.Failure -> ParserResult.Failure(
-                                        expected= newName,
-                                        position = input.position
-                                )
-                                is ParserResult.Success -> ParserResult.Success(
-                                        expected = newName,
-                                        position = resultA.position,
-                                        payload = resultA.payload,
-                                        remainingInput = resultA.remainingInput,
-                                        value = resultA.value
-                                )
-                        }
+        Parser(
+                fun(input: IInput<TStreamItem>): ParserResult<T, TStreamItem> {
+                    val thisResult = this.parse(input)
+                    return when (thisResult) {
+                        is ParserResult.Failure -> ParserResult.Failure(
+                                expected = newName,
+                                position = input.position
+                        )
+                        is ParserResult.Success -> ParserResult.Success(
+                                position = thisResult.position,
+                                payload = thisResult.payload,
+                                remainingInput = thisResult.remainingInput,
+                                value = thisResult.value
+                        )
+                    }
                 }
         )

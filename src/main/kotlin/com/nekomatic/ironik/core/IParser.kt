@@ -25,6 +25,5 @@
 package com.nekomatic.ironik.core
 
 interface IParser<out T : Any, TStreamItem : Any> {
-    val name: String
     fun parse(input: IInput<TStreamItem>): ParserResult<T, TStreamItem>
 }
