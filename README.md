@@ -4,4 +4,14 @@ This is another attempt to create a simple parser combinator library which solve
 The goal of the `ironik` project is to create simple parser combinator library which solves this problem.
 
 The name of this project is inspired by the `Irony` parser for .Net (https://github.com/IronyProject/Irony). I liked there the concept removing the dependency on a dedicated lexer. 
-I also intend to borrow some ideas from `spache` (https://github.com/sprache/Sprache) which another parser combinator library for .Net.
+I also intend to borrow some ideas from `spache` (https://github.com/sprache/Sprache) which another parser combinator library for .Net. 
+
+Maven dependency:
+
+```xml
+<dependency>
+    <groupId>com.nekomatic</groupId>
+    <artifactId>ironik</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
