@@ -31,8 +31,6 @@ class Input<TStreamItem : Any>(private val input: List<TStreamItem>, private val
         fun <T : Any> create(input: List<T>) = Input(input)
     }
 
-    override fun hasNext(): Boolean = index < input.size
-
     override val item: Option<TStreamItem>
         get() =
             if (index >= input.size)
@@ -45,12 +43,6 @@ class Input<TStreamItem : Any>(private val input: List<TStreamItem>, private val
                 this
             else
                 Input(this.input, index + 1, line, column + 1)
-
-    override fun nextLine(): Input<TStreamItem> =
-            if (index >= input.size)
-                this
-            else
-                Input(this.input, index + 1, line + 1, 0)
 
     override val position: Int
         get() = index

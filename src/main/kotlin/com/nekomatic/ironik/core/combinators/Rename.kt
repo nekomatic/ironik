@@ -29,9 +29,9 @@ import com.nekomatic.ironik.core.IParser
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 
-infix fun <T : Any, TStreamItem : Any> IParser<T, TStreamItem>.renameTo(newName: String): IParser<T, TStreamItem> =
+infix fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<T, TStreamItem, TInput>.renameTo(newName: String): IParser<T, TStreamItem, TInput> =
         Parser(
-                fun(input: IInput<TStreamItem>): ParserResult<T, TStreamItem> {
+                fun(input: IInput<TStreamItem>): ParserResult<T, TStreamItem, TInput> {
                     val thisResult = this.parse(input)
                     return when (thisResult) {
                         is ParserResult.Failure -> ParserResult.Failure(

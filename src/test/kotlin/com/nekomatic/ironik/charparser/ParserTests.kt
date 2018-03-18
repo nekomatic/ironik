@@ -72,13 +72,13 @@ internal class ParserTests {
     }}
     """.trimIndent()
 
-    fun <T : Any> parse(str: String, parser: IParser<T, Char>): ParserResult<T, Char> {
+    fun <T : Any> parse(str: String, parser: IParser<T, Char, CharInput>): ParserResult<T, Char, CharInput> {
         val input = CharInput.create(str)
         val result = parser.parse(input)
         return result
     }
 
-    fun <T : Any> assertMany(m: Map<String, Boolean>, parser: IParser<T, Char>) {
+    fun <T : Any> assertMany(m: Map<String, Boolean>, parser: IParser<T, Char, CharInput>) {
         assert(m.map { (parse(it.key, parser) is ParserResult.Success) == it.value }.reduce { a, b -> a && b })
     }
 
@@ -156,7 +156,7 @@ internal class ParserTests {
                 "{]" to false,
                 " { ]" to false
         )
-        val parser = oneOf("square bracket or bool",lSqBr, rSqBr, jBool)
+        val parser = oneOf("square bracket or bool", lSqBr, rSqBr, jBool)
         assertMany(tests, parser)
     }
 
@@ -203,7 +203,7 @@ internal class ParserTests {
                 "{]" to false,
                 " { ]" to false
         )
-        val parser = lSqBr.otherwise("[|]",rSqBr)
+        val parser = lSqBr.otherwise("[|]", rSqBr)
         assertMany(tests, parser)
     }
 
@@ -227,8 +227,8 @@ internal class ParserTests {
         )
         val parser =
                 lSqBr
-                        .otherwise("[|true|false",rSqBr)
-                        .otherwise("[|true|false|]",jBool)
+                        .otherwise("[|true|false", rSqBr)
+                        .otherwise("[|true|false|]", jBool)
         assertMany(tests, parser)
     }
 
@@ -272,7 +272,7 @@ internal class ParserTests {
         )
         val parser1 = lSqBr then rSqBr
         val parser2 = lSqBr then jBool then rSqBr
-        val parser = parser1.otherwise("[]|[bool]",parser2)
+        val parser = parser1.otherwise("[]|[bool]", parser2)
         assertMany(tests, parser)
     }
 
@@ -296,7 +296,7 @@ internal class ParserTests {
                 "{]" to false,
                 " { ]" to false
         )
-        val parser1 = lSqBr.otherwise("[|]",rSqBr).otherwise("[|true|false|]",jBool)
+        val parser1 = lSqBr.otherwise("[|]", rSqBr).otherwise("[|true|false|]", jBool)
         val separator = coma
         val parser = parser1.listOfSeparatedBy(separator)
         assertMany(tests, parser)
@@ -323,18 +323,19 @@ internal class ParserTests {
                 "{]" to false,
                 " { ]," to false
         )
-        val parser1 = lSqBr.otherwise("[|]",rSqBr).otherwise("[|true|false|]",jBool)
+        val parser1 = lSqBr.otherwise("[|]", rSqBr).otherwise("[|true|false|]", jBool)
         val separator = coma
         val parser = lCrBr then parser1.listOfSeparatedBy(separator) then rCrBr
         assertMany(tests, parser)
     }
+
     @Test
     fun test11_otherwiseEvenMoreComplexTest() {
         val tests = mapOf(
                 "[]" to true,
                 " []" to true,
                 " [ ]" to true,
-                " [ ] " to true,
+                " \n [ ] " to true,
                 "[ ] " to true,
                 "[] " to true,
                 " [ ] " to true,
@@ -367,10 +368,33 @@ internal class ParserTests {
                 "true { ]" to false
         )
         val parser1 = lSqBr then rSqBr
-        val parser2 = jBool.listOfSeparatedBy(coma) prefixedBy lSqBr suffixedBy  rSqBr
-        val parser = parser1.otherwise("[]|[list]",parser2)
+        val parser2 = jBool.listOfSeparatedBy(coma) prefixedBy lSqBr suffixedBy rSqBr
+        val parser = parser1.otherwise("[]|[list]", parser2)
         assertMany(tests, parser)
     }
+
+    @Test
+    fun test12_eolSimpleTest() {
+        val tests = mapOf(
+                "\n []" to true
+        )
+        val parser = eol
+        assertMany(tests, parser)
+    }
+
+//    @Test
+//    fun test13_eolTest() {
+//        val tests = mapOf(
+//                "[\n[]" to true
+////                "[\r\n []" to true,
+////                "[\r [ ]" to true,
+////                "\r\n [ ] " to false,
+////                "] " to false,
+////                "[ ] " to false
+//        )
+//        val parser = lSqBr then eol
+//        assertMany(tests, parser)
+//    }
 
     @Test
     fun jsonTest01_simpleNumber() {

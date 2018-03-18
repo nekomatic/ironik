@@ -22,12 +22,36 @@
  * SOFTWARE.
  */
 
-package com.nekomatic.ironik.core.combinators
+package com.nekomatic.ironik.token
 
 import com.nekomatic.ironik.core.IInput
 import com.nekomatic.ironik.core.IParser
 
-fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> List<IParser<T, TStreamItem, TInput>>.sequence() = sequenceOf(*(this.toTypedArray()))
-fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<T, TStreamItem, TInput>.starRule() = zeroOrMore(this)
-fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<T, TStreamItem, TInput>.plusRule() = oneOrMore(this)
-fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<T, TStreamItem, TInput>.optional() = option(this)
+
+//class Token<TStreamItem : Any>(val name: String, val parser: IParser<TStreamItem, TStreamItem>) {
+//
+//}
+//
+//
+//sealed class TokenResult<out T : Any, out TStreamItem : Any>(open val name: String) {
+//
+//    data class Success<out T : Any, TStreamItem : Any>(
+//            override val name: String,
+//            val value: List<TStreamItem>,
+//            val remainingInput: IInput<TStreamItem>,
+//            val payload: List<TStreamItem>,
+//            val position: Position
+//    ) : TokenResult<T, TStreamItem>(name)
+//
+//    data class Failure<out TStreamItem : Any>(
+//            override val name: String,
+//            val at: Int
+//    ) : TokenResult<Nothing, TStreamItem>(name)
+//}
+//
+//class Position(
+//        val index: Int,
+//        val length: Int,
+//        val column: Int = 0,
+//        val line: Int = 0
+//)

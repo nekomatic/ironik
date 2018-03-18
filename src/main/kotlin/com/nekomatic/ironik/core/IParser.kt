@@ -24,6 +24,6 @@
 
 package com.nekomatic.ironik.core
 
-interface IParser<out T : Any, TStreamItem : Any> {
-    fun parse(input: IInput<TStreamItem>): ParserResult<T, TStreamItem>
+interface IParser<out T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> {
+    fun parse(input: IInput<TStreamItem>): ParserResult<T, TStreamItem, TInput>
 }

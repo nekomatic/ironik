@@ -30,7 +30,7 @@ import com.nekomatic.ironik.core.combinators.*
 import com.nekomatic.types.Option
 import com.nekomatic.types.flatten
 
-class JsonParser() : IParser<Json, Char> {
+class JsonParser() : IParser<Json, Char,CharInput> {
     companion object {
         private val jTokenParser = oneOf( "json value",
                 JsonParsers.jArray,
@@ -91,8 +91,8 @@ class JsonParsers() {
 
         internal val jStringChar = escaped.otherwise("string character",anyCharExcluding(quote.otherwise("unescaped string character",backSl)))
 
-        internal val jNumDiscreete: IParser<List<Char>, Char> = zero.otherwise("0|[1-9][0-9]*",nonZero)
-        internal val jNumDotpart: IParser<List<Char>, Char> = oneOrMore(digit).prefixedBy(char('.')) mapValue { listOf('.') + it }
+        internal val jNumDiscreete: IParser<List<Char>, Char,CharInput> = zero.otherwise("0|[1-9][0-9]*",nonZero)
+        internal val jNumDotpart: IParser<List<Char>, Char,CharInput> = oneOrMore(digit).prefixedBy(char('.')) mapValue { listOf('.') + it }
         internal val jNumEPart = option(char('+').otherwise("+|-",char('-'))) then (char('e').otherwise("e|E",char('E'))) then oneOrMore(digit) mapValue { it.flatten() } mapValue
                 {
                     (if (it.item01 is Option.Some) listOf((it.item01 as Option.Some<Char>).value)
@@ -113,30 +113,30 @@ class JsonParsers() {
                     }
         }
 
-        val jString: IParser<Json.String, Char> =
+        val jString: IParser<Json.String, Char,CharInput> =
                 (string("\"\"")
                         .toConst(Json.String("")))
                         .otherwise("any sctring character",oneOrMore(jStringChar)
                                 .surroundedBy(quote)
                                 .mapValue { Json.String(it.joinToString("")) })
-        val jBool: IParser<Json.Bool, Char> =
+        val jBool: IParser<Json.Bool, Char,CharInput> =
                 string("true")
                         .otherwise("true|false",string("false"))
                         .mapValue { if (it == "true") Json.Bool.True else Json.Bool.False }
 
         val jNumber = doubleOption.onlyIfSome("valid number") mapValue { Json.Number(it) }
-        val jNull: IParser<Json.Null, Char> = string("null") mapValue { Json.Null }
+        val jNull: IParser<Json.Null, Char,CharInput> = string("null") mapValue { Json.Null }
 
-        internal val emptyArray: IParser<Json.Array, Char> = (lSqBr then rSqBr).toConst(Json.Array(listOf()))
-        internal val nonEmptyArray: IParser<Json.Array, Char> = (JsonParser() listOfSeparatedBy coma) suffixedBy rSqBr prefixedBy lSqBr mapValue { Json.Array(it) }
+        internal val emptyArray: IParser<Json.Array, Char,CharInput> = (lSqBr then rSqBr).toConst(Json.Array(listOf()))
+        internal val nonEmptyArray: IParser<Json.Array, Char,CharInput> = (JsonParser() listOfSeparatedBy coma) suffixedBy rSqBr prefixedBy lSqBr mapValue { Json.Array(it) }
 
-        val jArray: IParser<Json.Array, Char> = nonEmptyArray.otherwise("json array",emptyArray)
+        val jArray: IParser<Json.Array, Char,CharInput> = nonEmptyArray.otherwise("json array",emptyArray)
 
-        internal val jProperty: IParser<Json.Property, Char> = (jString suffixedBy colon) then JsonParser() mapValue { Json.Property(name = it.item01, value = it.item02) }
-        internal val emptyObject: IParser<Json.Object, Char> = (lCrBr then rCrBr).toConst(Json.Object(listOf()))
-        internal val nonEmptyObject: IParser<Json.Object, Char> = ((jProperty.listOfSeparatedBy(coma)).suffixedBy(rCrBr) prefixedBy lCrBr).mapValue { Json.Object(it) }
+        internal val jProperty: IParser<Json.Property, Char,CharInput> = (jString suffixedBy colon) then JsonParser() mapValue { Json.Property(name = it.item01, value = it.item02) }
+        internal val emptyObject: IParser<Json.Object, Char,CharInput> = (lCrBr then rCrBr).toConst(Json.Object(listOf()))
+        internal val nonEmptyObject: IParser<Json.Object, Char,CharInput> = ((jProperty.listOfSeparatedBy(coma)).suffixedBy(rCrBr) prefixedBy lCrBr).mapValue { Json.Object(it) }
 
-        val jObject: IParser<Json.Object, Char> = emptyObject.otherwise("json object",nonEmptyObject)
+        val jObject: IParser<Json.Object, Char,CharInput> = emptyObject.otherwise("json object",nonEmptyObject)
 
 
     }
