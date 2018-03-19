@@ -11,9 +11,11 @@ open class InputWithLines<TStreamItem : Any, TInput : InputWithLines<TStreamItem
         private val index: Int = 0,
         private val l: Int = 0,
         private val c: Int = 1,
-        private val lastKnownEolIndex: Int = 0
+        private val lastKnownEolIndex: Int = -1
 
 ) : IInput<TStreamItem> {
+
+
 
     companion object {
 
@@ -46,7 +48,6 @@ open class InputWithLines<TStreamItem : Any, TInput : InputWithLines<TStreamItem
 
     override val item: Option<TStreamItem>
         get() {
-//            val nextEolIndex: Int = findNextEolIndex()
             return if (isPastEnd.invoke(this.stream, this.position))
                 Option.None
             else
@@ -55,16 +56,16 @@ open class InputWithLines<TStreamItem : Any, TInput : InputWithLines<TStreamItem
 
 
     override fun next(): InputWithLines<TStreamItem, TInput, TStream> {
+        val nextEolIndex: Int = findNextEolIndex()
         val r = when {
             isPastEnd.invoke(this.stream, this.position) -> this
-            index == lastKnownEolIndex -> this.nextItem(newLine = true)
-            else -> this.nextItem(newLine = false)
+            index == nextEolIndex -> this.nextItem(newLine = true, lastKnownEolIndex = nextEolIndex)
+            else -> this.nextItem(newLine = false, lastKnownEolIndex = lastKnownEolIndex)
         }
         return r
     }
 
-    private fun nextItem(newLine: Boolean): InputWithLines<TStreamItem, TInput, TStream> {
-        val nextEolIndex: Int = findNextEolIndex()
+    private fun nextItem(newLine: Boolean, lastKnownEolIndex: Int): InputWithLines<TStreamItem, TInput, TStream> {
         return if (isPastEnd.invoke(this.stream, this.position))
             this
         else
@@ -76,7 +77,7 @@ open class InputWithLines<TStreamItem : Any, TInput : InputWithLines<TStreamItem
                     index = index + 1,
                     l = if (newLine) line + 1 else line,
                     c = if (newLine) 1 else c + 1,
-                    lastKnownEolIndex = nextEolIndex
+                    lastKnownEolIndex = lastKnownEolIndex
             )
     }
 
