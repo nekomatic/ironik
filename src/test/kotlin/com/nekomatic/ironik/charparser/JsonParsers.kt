@@ -42,16 +42,12 @@ class JsonParser() : IParser<Json, Char,CharInput> {
         )
     }
 
-    //    override val name: String = "json"
     override fun parse(input: IInput<Char>) = jTokenParser.parse(input)
 }
 
 class JsonParsers() {
 
     companion object {
-
-
-        //TODO: make good use of touple types and create tests
 
         internal val lSqBr by lazy { char('[').token() }
         internal val rSqBr by lazy { char(']').token() }
@@ -90,7 +86,6 @@ class JsonParsers() {
         )
 
         internal val jStringChar = escaped.otherwise("string character",anyCharExcluding(quote.otherwise("unescaped string character",backSl)))
-
         internal val jNumDiscreete: IParser<List<Char>, Char,CharInput> = zero.otherwise("0|[1-9][0-9]*",nonZero)
         internal val jNumDotpart: IParser<List<Char>, Char,CharInput> = oneOrMore(digit).prefixedBy(char('.')) mapValue { listOf('.') + it }
         internal val jNumEPart = option(char('+').otherwise("+|-",char('-'))) then (char('e').otherwise("e|E",char('E'))) then oneOrMore(digit) mapValue { it.flatten() } mapValue
@@ -137,7 +132,5 @@ class JsonParsers() {
         internal val nonEmptyObject: IParser<Json.Object, Char,CharInput> = ((jProperty.listOfSeparatedBy(coma)).suffixedBy(rCrBr) prefixedBy lCrBr).mapValue { Json.Object(it) }
 
         val jObject: IParser<Json.Object, Char,CharInput> = emptyObject.otherwise("json object",nonEmptyObject)
-
-
     }
 }
