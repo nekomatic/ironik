@@ -1,5 +1,7 @@
 package com.nekomatic.ironik.charparser
 
+import com.nekomatic.ironik.charparser.JsonParsers.Companion.jString
+import com.nekomatic.ironik.charparser.JsonParsers.Companion.strUTF
 import com.nekomatic.ironik.core.IParser
 import com.nekomatic.ironik.core.ParserResult
 import org.junit.jupiter.api.Test
@@ -234,14 +236,14 @@ class JsonParserTests {
     fun jsonTest21_escapedUtfChar() {
         val jp = JsonParsers()
 
-        val r = parse(escapedUtfChar, jp.strUTF)
+        val r = parse(escapedUtfChar, strUTF)
         assert(r is ParserResult.Success)
     }
 
     @Test
     fun jsonTest21_stringWithEscapedUtfChar() {
         val jp = JsonParsers()
-        val r = parse(stringWithEscapedUtfChar, jp.jString.token())
+        val r = parse(stringWithEscapedUtfChar, jString.token())
         assert(r is ParserResult.Success)
     }
 }

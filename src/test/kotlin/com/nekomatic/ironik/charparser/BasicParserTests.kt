@@ -1,10 +1,16 @@
 package com.nekomatic.ironik.charparser
 
 
+import com.nekomatic.ironik.charparser.JsonParsers.Companion.coma
+import com.nekomatic.ironik.charparser.JsonParsers.Companion.emptyArray
+import com.nekomatic.ironik.charparser.JsonParsers.Companion.jBool
+import com.nekomatic.ironik.charparser.JsonParsers.Companion.lCrBr
+import com.nekomatic.ironik.charparser.JsonParsers.Companion.lSqBr
+import com.nekomatic.ironik.charparser.JsonParsers.Companion.rCrBr
+import com.nekomatic.ironik.charparser.JsonParsers.Companion.rSqBr
 import com.nekomatic.ironik.core.IParser
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.combinators.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 internal class BasicParserTests {
@@ -20,11 +26,8 @@ internal class BasicParserTests {
     }
 
 
-
-
     @Test
     fun test01_lSqBrTokenTest() {
-        val jp = JsonParsers()
         val tests = mapOf(
                 "[" to true,
                 " [" to true,
@@ -38,12 +41,12 @@ internal class BasicParserTests {
                 "{" to false,
                 " { " to false
         )
-        assertMany(tests, jp.lSqBr)
+        assertMany(tests,
+                lSqBr)
     }
 
     @Test
     fun test02_rSqBrTokenTest() {
-        val jp = JsonParsers()
         val tests = mapOf(
                 "]" to true,
                 " ]" to true,
@@ -57,12 +60,12 @@ internal class BasicParserTests {
                 "{" to false,
                 " { " to false
         )
-        assertMany(tests, jp.rSqBr)
+        assertMany(tests,
+                rSqBr)
     }
 
     @Test
     fun test03_emptyArrayTest() {
-        val jp = JsonParsers()
         val tests = mapOf(
                 "[]" to true,
                 "[ ]" to true,
@@ -76,12 +79,11 @@ internal class BasicParserTests {
                 "[{]" to false,
                 "[ { ]" to false
         )
-        assertMany(tests, jp.emptyArray)
+        assertMany(tests, emptyArray)
     }
 
     @Test
     fun test04_oneOfTest() {
-        val jp = JsonParsers()
         val tests = mapOf(
                 "[" to true,
                 "]" to true,
@@ -98,13 +100,15 @@ internal class BasicParserTests {
                 "{]" to false,
                 " { ]" to false
         )
-        val parser = oneOf("square bracket or bool", jp.lSqBr, jp.rSqBr, jp.jBool)
+        val parser = oneOf("square bracket or bool",
+                lSqBr,
+                rSqBr,
+                jBool)
         assertMany(tests, parser)
     }
 
     @Test
     fun test05_thenTest() {
-        val jp = JsonParsers()
         val tests = mapOf(
                 "[]" to true,
                 " []" to true,
@@ -124,13 +128,14 @@ internal class BasicParserTests {
                 "{]" to false,
                 " { ]" to false
         )
-        val parser = jp.lSqBr then jp.rSqBr
+        val parser =
+                lSqBr then
+                        rSqBr
         assertMany(tests, parser)
     }
 
     @Test
     fun test06_otherwiseSimpleTest() {
-        val jp = JsonParsers()
         val tests = mapOf(
                 "[" to true,
                 "]" to true,
@@ -147,13 +152,14 @@ internal class BasicParserTests {
                 "{]" to false,
                 " { ]" to false
         )
-        val parser = jp.lSqBr.otherwise("[|]", jp.rSqBr)
+        val parser =
+                lSqBr.otherwise("[|]",
+                        rSqBr)
         assertMany(tests, parser)
     }
 
     @Test
     fun test07_otherwiseComplexTest() {
-        val jp = JsonParsers()
         val tests = mapOf(
                 "[" to true,
                 "]" to true,
@@ -171,15 +177,17 @@ internal class BasicParserTests {
                 " { ]" to false
         )
         val parser =
-                jp.lSqBr
-                        .otherwise("[|true|false", jp.rSqBr)
-                        .otherwise("[|true|false|]", jp.jBool)
+
+                lSqBr
+                        .otherwise("[|true|false",
+                                rSqBr)
+                        .otherwise("[|true|false|]",
+                                jBool)
         assertMany(tests, parser)
     }
 
     @Test
     fun test08_otherwiseMoreComplexTest() {
-        val jp = JsonParsers()
         val tests = mapOf(
                 "[]" to true,
                 " []" to true,
@@ -216,15 +224,19 @@ internal class BasicParserTests {
                 "{true]" to false,
                 "true { ]" to false
         )
-        val parser1 = jp.lSqBr then jp.rSqBr
-        val parser2 = jp.lSqBr then jp.jBool then jp.rSqBr
+        val parser1 =
+                lSqBr then
+                        rSqBr
+        val parser2 =
+                lSqBr then
+                        jBool then
+                        rSqBr
         val parser = parser1.otherwise("[]|[bool]", parser2)
         assertMany(tests, parser)
     }
 
     @Test
     fun test09_listOfSeparatedByTest() {
-        val jp = JsonParsers()
         val tests = mapOf(
                 "[" to true,
                 "]" to true,
@@ -243,15 +255,18 @@ internal class BasicParserTests {
                 "{]" to false,
                 " { ]" to false
         )
-        val parser1 = jp.lSqBr.otherwise("[|]", jp.rSqBr).otherwise("[|true|false|]", jp.jBool)
-        val separator = jp.coma
+        val parser1 =
+                lSqBr.otherwise("[|]",
+                        rSqBr).otherwise("[|true|false|]",
+                        jBool)
+        val separator =
+                coma
         val parser = parser1.listOfSeparatedBy(separator)
         assertMany(tests, parser)
     }
 
     @Test
     fun test10_enclosedListOfSeparatedByTest() {
-        val jp = JsonParsers()
         val tests = mapOf(
                 "{[}" to true,
                 "{]}" to true,
@@ -271,15 +286,19 @@ internal class BasicParserTests {
                 "{]" to false,
                 " { ]," to false
         )
-        val parser1 = jp.lSqBr.otherwise("[|]", jp.rSqBr).otherwise("[|true|false|]", jp.jBool)
-        val separator = jp.coma
-        val parser = jp.lCrBr then parser1.listOfSeparatedBy(separator) then jp.rCrBr
+        val parser1 =
+                lSqBr.otherwise("[|]",
+                        rSqBr).otherwise("[|true|false|]",
+                        jBool)
+        val separator =
+                coma
+        val parser =
+                lCrBr then parser1.listOfSeparatedBy(separator) then rCrBr
         assertMany(tests, parser)
     }
 
     @Test
     fun test11_otherwiseEvenMoreComplexTest() {
-        val jp = JsonParsers()
         val tests = mapOf(
                 "[]" to true,
                 " []" to true,
@@ -317,8 +336,14 @@ internal class BasicParserTests {
                 "true { ]" to false
         )
 
-        val parser1 = jp.lSqBr then jp.rSqBr
-        val parser2 = jp.jBool.listOfSeparatedBy(jp.coma) prefixedBy jp.lSqBr suffixedBy jp.rSqBr
+        val parser1 =
+                lSqBr then
+                        rSqBr
+        val parser2 =
+                jBool.listOfSeparatedBy(
+                        coma) prefixedBy
+                        lSqBr suffixedBy
+                        rSqBr
         val parser = parser1.otherwise("[]|[list]", parser2)
         assertMany(tests, parser)
     }
