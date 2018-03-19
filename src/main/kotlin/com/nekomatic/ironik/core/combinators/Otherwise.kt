@@ -17,7 +17,9 @@ fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<T, TStrea
                                 is ParserResult.Success -> thatResult
                                 is ParserResult.Failure -> ParserResult.Failure(
                                         expected = name,
-                                        position = input.position
+                                        position = input.position,
+                                        column = input.column,
+                                        line = input.line
                                 )
                             }
                         }

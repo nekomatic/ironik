@@ -36,14 +36,11 @@ infix fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<T, 
                     return when (thisResult) {
                         is ParserResult.Failure -> ParserResult.Failure(
                                 expected = newName,
-                                position = input.position
+                                position = input.position,
+                                column = input.column,
+                                line = input.line
                         )
-                        is ParserResult.Success -> ParserResult.Success(
-                                position = thisResult.position,
-                                payload = thisResult.payload,
-                                remainingInput = thisResult.remainingInput,
-                                value = thisResult.value
-                        )
+                        is ParserResult.Success -> thisResult
                     }
                 }
         )

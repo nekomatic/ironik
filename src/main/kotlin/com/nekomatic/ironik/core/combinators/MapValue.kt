@@ -38,7 +38,9 @@ infix fun <T1 : Any, T2 : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> 
                                 value = map(thisResult.value),
                                 remainingInput = thisResult.remainingInput,
                                 payload = thisResult.payload,
-                                position = input.position
+                                position = input.position,
+                                column = input.column,
+                                line = input.line
                         )
                         is ParserResult.Failure -> thisResult
                     }

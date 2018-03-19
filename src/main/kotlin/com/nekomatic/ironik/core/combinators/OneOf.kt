@@ -12,6 +12,11 @@ fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> oneOf(name: Strin
                         val parserResult = parser.parse(input)
                         if (parserResult is ParserResult.Success) return parserResult
                     }
-                    return ParserResult.Failure(name, input.position)
+                    return ParserResult.Failure(
+                            expected= name,
+                            position = input.position,
+                            column = input.column,
+                            line = input.line
+                    )
                 }
         )

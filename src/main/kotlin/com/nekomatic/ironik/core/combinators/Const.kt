@@ -14,7 +14,9 @@ infix fun <TA : Any, TB : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> 
                                 value = const,
                                 remainingInput = thisResult.remainingInput,
                                 payload = thisResult.payload,
-                                position = input.position
+                                position = input.position,
+                                column = input.column,
+                                line = input.line
                         )
                         is ParserResult.Failure -> thisResult
                     }

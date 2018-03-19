@@ -46,7 +46,9 @@ fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> sequenceOf(vararg
                                     value = accumulatorList.map { r -> r.value },
                                     remainingInput = currentInput,
                                     payload = accumulatorList.map { r -> r.payload }.reduce({ a, b -> a + b }),
-                                    position = input.position
+                                    position = input.position,
+                                    column = input.column,
+                                    line = input.line
                             )
                     }
                     parseNext(input)

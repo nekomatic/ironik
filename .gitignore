@@ -162,5 +162,8 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 .idea
-parser.iml
+*.iml
 target/
+.classpath
+.project
+

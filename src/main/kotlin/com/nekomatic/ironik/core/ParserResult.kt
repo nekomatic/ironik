@@ -29,11 +29,15 @@ sealed class ParserResult<out T : Any, TStreamItem : Any, TInput : IInput<TStrea
             val value: T,
             val remainingInput: IInput<TStreamItem>,
             val payload: List<TStreamItem>,
-            val position: Int
+            val position: Int,
+            val column:Int,
+            val line:Int
     ) : ParserResult<T, TStreamItem, TInput>()
 
     data class Failure<TStreamItem : Any, TInput : IInput<TStreamItem>>(
             val expected: String,
-            val position: Int
+            val position: Int,
+            val column:Int,
+            val line:Int
     ) : ParserResult<Nothing, TStreamItem, TInput>()
 }

@@ -14,7 +14,9 @@ fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> oneOrNone(parser:
                                 value = defaultValue,
                                 remainingInput = input,
                                 payload = listOf(),
-                                position = input.position
+                                position = input.position,
+                                column = input.column,
+                                line = input.line
                         )
                         is ParserResult.Success -> parserRresult
                     }

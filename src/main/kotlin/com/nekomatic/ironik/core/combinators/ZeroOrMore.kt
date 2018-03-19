@@ -18,7 +18,9 @@ fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> zeroOrMore(parser
                                         listOf<TStreamItem>()
                                     else
                                         accumulatorList.map { r: ParserResult.Success<T, TStreamItem, TInput> -> r.payload }.reduce({ a, b -> a + b }),
-                                    position = input.position
+                                    position = input.position,
+                                    column = input.column,
+                                    line = input.line
                             )
                             is ParserResult.Success -> parseNext(parserResult.remainingInput, accumulatorList + parserResult)
                         }

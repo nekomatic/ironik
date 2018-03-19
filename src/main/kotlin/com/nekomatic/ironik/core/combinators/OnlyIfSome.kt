@@ -19,11 +19,15 @@ fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<Option<T>
                                         value = option.value,
                                         remainingInput = thisResult.remainingInput,
                                         position = thisResult.position,
-                                        payload = thisResult.payload
+                                        payload = thisResult.payload,
+                                        column = thisResult.column,
+                                        line = thisResult.line
                                 )
                                 is Option.None -> ParserResult.Failure(
                                         expected = name,
-                                        position = input.position
+                                        position = input.position,
+                                        column = input.column,
+                                        line = input.line
                                 )
                             }
                         }

@@ -12,20 +12,26 @@ fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> oneOrMore(parser:
                     return when (parserResult) {
                         is ParserResult.Failure -> ParserResult.Failure(
                                 expected = "(at least one of '" + parserResult.expected + "')",
-                                position = input.position
+                                position = input.position,
+                                column = input.column,
+                                line = input.line
                         )
                         is ParserResult.Success -> {
                             val resultB: ParserResult<List<T>, TStreamItem, TInput> = (zeroOrMore(parser)).parse(parserResult.remainingInput)
                             return when (resultB) {
                                 is ParserResult.Failure<TStreamItem, TInput> -> ParserResult.Failure(
                                         expected = "(at least one of '" + resultB.expected + "')",
-                                        position = input.position
+                                        position = input.position,
+                                        column = input.column,
+                                        line = input.line
                                 )
                                 is ParserResult.Success -> ParserResult.Success(
                                         value = listOf(parserResult.value) + resultB.value,
                                         remainingInput = resultB.remainingInput,
                                         payload = parserResult.payload + resultB.payload,
-                                        position = input.position
+                                        position = input.position,
+                                        column = input.column,
+                                        line = input.line
                                 )
                             }
                         }

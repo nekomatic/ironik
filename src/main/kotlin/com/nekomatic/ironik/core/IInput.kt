@@ -32,7 +32,6 @@ interface IInput<TStreamItem:Any> :INExt<IInput<TStreamItem>> {
     val position: Int
     val line: Int
     val column: Int
-//    override fun next(): TInput
 }
 
 interface INExt<out T:Any>{

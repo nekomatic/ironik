@@ -13,7 +13,9 @@ fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<T, TStrea
                     return when (thisResult) {
                         is ParserResult.Failure -> ParserResult.Failure(
                                 expected = name,
-                                position = thisResult.position
+                                position = thisResult.position,
+                                column = input.column,
+                                line = input.line
                         )
                         is ParserResult.Success -> {
                             val newInput: IInput<TStreamItem> = Input(thisResult.payload, 0)
@@ -22,7 +24,9 @@ fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<T, TStrea
                                 is ParserResult.Success -> thisResult
                                 is ParserResult.Failure -> ParserResult.Failure(
                                         expected = name,
-                                        position = input.position
+                                        position = input.position,
+                                        column = input.column,
+                                        line = input.line
                                 )
                             }
                         }

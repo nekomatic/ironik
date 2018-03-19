@@ -12,13 +12,17 @@ class EofParser<out T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> : 
             when (input.item) {
                 is Option.Some<TStreamItem> -> ParserResult.Failure(
                         expected = name,
-                        position = input.position
+                        position = input.position,
+                        column = input.column,
+                        line = input.line
                 )
                 Option.None -> ParserResult.Success(
                         value = StreamItem.End.OfFile,
                         remainingInput = input,
                         payload = listOf(),
-                        position = input.position
+                        position = input.position,
+                        column = input.column,
+                        line = input.line
                 )
             }
 }

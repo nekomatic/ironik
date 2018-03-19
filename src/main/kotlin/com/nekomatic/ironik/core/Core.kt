@@ -12,7 +12,9 @@ fun <TStreamItem : Any, TInput : IInput<TStreamItem>> createParser(name: String,
                     when (currentItem) {
                         Option.None -> ParserResult.Failure<TStreamItem, TInput>(
                                 expected = name,
-                                position = input.position
+                                position = input.position,
+                                column = input.column,
+                                line = input.line
                         )
                         is Option.Some -> {
                             val current = currentItem.value
@@ -22,12 +24,16 @@ fun <TStreamItem : Any, TInput : IInput<TStreamItem>> createParser(name: String,
                                         value = current,
                                         remainingInput = remaining,
                                         payload = listOf(current),
-                                        position = input.position
+                                        position = input.position,
+                                        column = input.column,
+                                        line = input.line
                                 )
                             } else
                                 ParserResult.Failure<TStreamItem, TInput>(
                                         expected = name,
-                                        position = input.position
+                                        position = input.position,
+                                        column = input.column,
+                                        line = input.line
                                 )
                         }
                     }
@@ -43,7 +49,9 @@ fun <T1 : Any, T2 : Any, T3 : Any, TStreamItem : Any, TInput : IInput<TStreamIte
                             value = func(this.value, result.value),
                             remainingInput = result.remainingInput,
                             payload = this.payload + result.payload,
-                            position = this.position
+                            position = this.position,
+                            column = this.column,
+                            line = this.line
                     )
                     is ParserResult.Failure -> result
                 }

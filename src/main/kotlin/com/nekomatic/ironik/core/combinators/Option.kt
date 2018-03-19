@@ -15,13 +15,17 @@ fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> option(parser: IP
                                 value = Option.Some(parserResult.value),
                                 remainingInput = parserResult.remainingInput,
                                 payload = parserResult.payload,
-                                position = input.position
+                                position = input.position,
+                                column = input.column,
+                                line = input.line
                         )
                         is ParserResult.Failure -> ParserResult.Success(
                                 value = Option.None,
                                 remainingInput = input,
                                 payload = listOf(),
-                                position = input.position
+                                position = input.position,
+                                column = input.column,
+                                line = input.line
                         )
                     }
                 }

@@ -12,7 +12,9 @@ fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> anythingBut(parse
                     if (parserResult is ParserResult.Success)
                         ParserResult.Failure<TStreamItem, TInput>(
                                 position = input.position,
-                                expected = "Anything which is not '${parserResult.payload.joinToString { it.toString() }}'"
+                                expected = "Anything which is not '${parserResult.payload.joinToString { it.toString() }}'",
+                                column = input.column,
+                                line = input.line
                         )
                     else
                         any<TStreamItem, TInput>().parse(input)
