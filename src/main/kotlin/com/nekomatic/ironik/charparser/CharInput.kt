@@ -25,42 +25,68 @@
 
 package com.nekomatic.ironik.charparser
 
-import com.nekomatic.ironik.core.IInput
-import com.nekomatic.types.Option
+import com.nekomatic.ironik.core.InputWithLines
 
 
-class CharInput(private val input: CharSequence, private val index: Int = 0, private val l: Int = 0, private val c: Int = 0) : IInput<Char> {
+class CharInput(
+        private val charSequence: CharSequence,
+        private val eolTestParser: (stream: CharSequence, currentIndex: Int, lastKnown: Int) -> Int,
+        private val itemAtIndex: (stream: CharSequence, currentIndex: Int) -> Char,
+        private val isPastEnd: (input: CharSequence, currentIndex: Int) -> Boolean,
+        private val index: Int = 0,
+        private val l: Int = 1,
+        private val c: Int = 1,
+        private val lastKnownEolIndex: Int = -1
+) : InputWithLines<Char, CharInput, CharSequence>(
+        stream = charSequence,
+        nextEolIndexFinder = eolTestParser,
+        itemAtIndex = itemAtIndex,
+        isPastEnd = isPastEnd,
+        index = index,
+        l = l,
+        c = c,
+        lastKnownEolIndex = lastKnownEolIndex
+) {
     companion object {
-        fun create(input: CharSequence) = CharInput(input)
+
+        private fun eolIndexFinder(stream: CharSequence, currentIndex: Int, lastKnownEolIndex: Int, itemAtIndex: (CharSequence, Int) -> Char, pastEnd: (CharSequence, Int) -> Boolean): Int {
+
+            return if (pastEnd.invoke(stream, currentIndex)) lastKnownEolIndex
+            else {
+                val currentItem = itemAtIndex.invoke(stream, currentIndex)
+                return when {
+                    isCurrentRN(stream, currentIndex, currentItem, itemAtIndex, pastEnd) -> currentIndex + 1
+                    currentItem == '\n' -> currentIndex
+                    currentItem == '\r' -> currentIndex
+                    else -> lastKnownEolIndex
+                }
+            }
+        }
+
+        private fun isCurrentRN(stream: CharSequence, currentIndex: Int, item: Char, itemAtIndex: (CharSequence, Int) -> Char, pastEnd: (CharSequence, Int) -> Boolean): Boolean {
+            return when (item) {
+                '\r' -> when {
+                    pastEnd(stream, currentIndex + 1) -> false
+                    itemAtIndex.invoke(stream, currentIndex + 1) == '\n' -> true
+                    else -> false
+                }
+                else -> false
+            }
+        }
+
+        fun create(input: CharSequence): CharInput {
+            val itemAtIndex = { s: CharSequence, i: Int -> s[i] }
+            val isPastEnd = { s: CharSequence, i: Int -> i >= s.length }
+            val eolTestParser = { s: CharSequence, i: Int, lastKnown: Int -> eolIndexFinder(s, i, lastKnown, itemAtIndex, isPastEnd) }
+            return CharInput(
+                    charSequence = input,
+                    eolTestParser = eolTestParser,
+                    itemAtIndex = itemAtIndex,
+                    isPastEnd = isPastEnd
+            )
+        }
     }
-
-    override fun hasNext(): Boolean = index < input.length
-
-    override val item: Option<Char>
-        get() =
-            if (index >= input.length)
-                Option.None
-            else
-                Option.Some(input[index])
-
-    override fun next(): CharInput =
-            if (index >= input.length)
-                this
-            else
-                CharInput(this.input, index + 1, line, column + 1)
-
-    override fun nextLine(): CharInput =
-            if (index >= input.length)
-                this
-            else
-                CharInput(this.input, index + 1, line + 1, 0)
-
-    override val position: Int
-        get() = index
-
-    override val line: Int
-        get() = l
-
-    override val column: Int
-        get() = c
 }
+
+
+

@@ -5,9 +5,9 @@ import com.nekomatic.ironik.core.IParser
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 
-fun <T : Any, TStreamItem : Any> IParser<T, TStreamItem>.otherwise(name: String, that: IParser<T, TStreamItem>): IParser<T, TStreamItem> =
+fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<T, TStreamItem, TInput>.otherwise(name: String, that: IParser<T, TStreamItem, TInput>): IParser<T, TStreamItem, TInput> =
         Parser(
-                fun(input: IInput<TStreamItem>): ParserResult<T, TStreamItem> {
+                fun(input: IInput<TStreamItem>): ParserResult<T, TStreamItem, TInput> {
                     val thisResult = this.parse(input)
                     return when (thisResult) {
                         is ParserResult.Success -> thisResult
@@ -17,7 +17,9 @@ fun <T : Any, TStreamItem : Any> IParser<T, TStreamItem>.otherwise(name: String,
                                 is ParserResult.Success -> thatResult
                                 is ParserResult.Failure -> ParserResult.Failure(
                                         expected = name,
-                                        position = input.position
+                                        position = input.position,
+                                        column = input.column,
+                                        line = input.line
                                 )
                             }
                         }

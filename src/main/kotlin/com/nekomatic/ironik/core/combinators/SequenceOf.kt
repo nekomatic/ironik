@@ -30,11 +30,11 @@ import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 import com.nekomatic.types.PositiveInt
 
-fun <T : Any, TStreamItem : Any> sequenceOf(vararg parsers: IParser<T, TStreamItem>): IParser<List<T>, TStreamItem> =
+fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> sequenceOf(vararg parsers: IParser<T, TStreamItem, TInput>): IParser<List<T>, TStreamItem, TInput> =
         Parser(
                 { input: IInput<TStreamItem> ->
                     val iterator = parsers.iterator()
-                    tailrec fun parseNext(currentInput: IInput<TStreamItem>, accumulatorList: List<ParserResult.Success<T, TStreamItem>> = listOf()): ParserResult<List<T>, TStreamItem> {
+                    tailrec fun parseNext(currentInput: IInput<TStreamItem>, accumulatorList: List<ParserResult.Success<T, TStreamItem, TInput>> = listOf()): ParserResult<List<T>, TStreamItem, TInput> {
                         return if (iterator.hasNext()) {
                             val result = iterator.next().parse(currentInput)
                             when (result) {
@@ -46,24 +46,26 @@ fun <T : Any, TStreamItem : Any> sequenceOf(vararg parsers: IParser<T, TStreamIt
                                     value = accumulatorList.map { r -> r.value },
                                     remainingInput = currentInput,
                                     payload = accumulatorList.map { r -> r.payload }.reduce({ a, b -> a + b }),
-                                    position = input.position
+                                    position = input.position,
+                                    column = input.column,
+                                    line = input.line
                             )
                     }
                     parseNext(input)
                 }
         )
 
-fun <T : Any, TStreamElement : Any> numberOf(parser: IParser<T, TStreamElement>, count: PositiveInt) =
+fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> numberOf(parser: IParser<T, TStreamItem, TInput>, count: PositiveInt) =
         sequenceOf(*Array(count.value, { parser }))
 
-fun <T : Any, TStreamElement : Any> IParser<T, TStreamElement>.count(count: PositiveInt) =
+fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<T, TStreamItem, TInput>.count(count: PositiveInt) =
         numberOf(this, count)
 
-fun <T : Any, TStreamElement : Any> twoOf(parser: IParser<T, TStreamElement>) =
+fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> twoOf(parser: IParser<T, TStreamItem, TInput>) =
         sequenceOf(*Array(2, { parser }))
 
-fun <T : Any, TStreamElement : Any> threeOf(parser: IParser<T, TStreamElement>) =
+fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> threeOf(parser: IParser<T, TStreamItem, TInput>) =
         sequenceOf(*Array(3, { parser }))
 
-fun <T : Any, TStreamElement : Any> fourOf(parser: IParser<T, TStreamElement>) =
+fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> fourOf(parser: IParser<T, TStreamItem, TInput>) =
         sequenceOf(*Array(4, { parser }))

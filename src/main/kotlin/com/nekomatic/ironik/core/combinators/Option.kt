@@ -6,22 +6,26 @@ import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 import com.nekomatic.types.Option
 
-fun <T : Any, TStreamItem : Any> option(parser: IParser<T, TStreamItem>): IParser<Option<T>, TStreamItem> =
+fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> option(parser: IParser<T, TStreamItem, TInput>): IParser<Option<T>, TStreamItem, TInput> =
         Parser(
-                fun(input: IInput<TStreamItem>): ParserResult<Option<T>, TStreamItem> {
+                fun(input: IInput<TStreamItem>): ParserResult<Option<T>, TStreamItem, TInput> {
                     val parserResult = parser.parse(input)
                     return when (parserResult) {
                         is ParserResult.Success -> ParserResult.Success(
                                 value = Option.Some(parserResult.value),
                                 remainingInput = parserResult.remainingInput,
                                 payload = parserResult.payload,
-                                position = input.position
+                                position = input.position,
+                                column = input.column,
+                                line = input.line
                         )
                         is ParserResult.Failure -> ParserResult.Success(
                                 value = Option.None,
                                 remainingInput = input,
                                 payload = listOf(),
-                                position = input.position
+                                position = input.position,
+                                column = input.column,
+                                line = input.line
                         )
                     }
                 }

@@ -5,16 +5,18 @@ import com.nekomatic.ironik.core.IParser
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 
-infix fun <TA : Any, TB : Any, TStreamItem : Any> IParser<TA, TStreamItem>.toConst(const: TB): IParser<TB, TStreamItem> =
+infix fun <TA : Any, TB : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<TA, TStreamItem, TInput>.toConst(const: TB): IParser<TB, TStreamItem, TInput> =
         Parser(
-                { input: IInput<TStreamItem> ->
+                fun(input: IInput<TStreamItem>): ParserResult<TB, TStreamItem, TInput> {
                     val thisResult = this.parse(input)
-                    when (thisResult) {
+                    return when (thisResult) {
                         is ParserResult.Success -> ParserResult.Success(
                                 value = const,
                                 remainingInput = thisResult.remainingInput,
                                 payload = thisResult.payload,
-                                position = input.position
+                                position = input.position,
+                                column = input.column,
+                                line = input.line
                         )
                         is ParserResult.Failure -> thisResult
                     }

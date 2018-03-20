@@ -29,16 +29,18 @@ import com.nekomatic.ironik.core.IParser
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.parsers.Parser
 
-infix fun <TA : Any, TB : Any, TStreamItem : Any> IParser<TA, TStreamItem>.mapValue(map: (TA) -> TB): IParser<TB, TStreamItem> =
+infix fun <T1 : Any, T2 : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<T1, TStreamItem, TInput>.mapValue(map: (T1) -> T2): IParser<T2, TStreamItem, TInput> =
         Parser(
-                { input: IInput<TStreamItem> ->
-                    val thisResult = this.parse(input)
-                    when (thisResult) {
+                fun(input: IInput<TStreamItem>): ParserResult<T2, TStreamItem, TInput> {
+                    val thisResult: ParserResult<T1, TStreamItem, TInput> = this.parse(input)
+                    return when (thisResult) {
                         is ParserResult.Success -> ParserResult.Success(
                                 value = map(thisResult.value),
                                 remainingInput = thisResult.remainingInput,
                                 payload = thisResult.payload,
-                                position = input.position
+                                position = input.position,
+                                column = input.column,
+                                line = input.line
                         )
                         is ParserResult.Failure -> thisResult
                     }
