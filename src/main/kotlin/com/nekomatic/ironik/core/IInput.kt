@@ -27,13 +27,10 @@ package com.nekomatic.ironik.core
 import com.nekomatic.types.Option
 
 
-interface IInput<TStreamItem:Any> :INExt<IInput<TStreamItem>> {
-    val item: Option<TStreamItem>
+interface IInput<TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>> {
+    val item: Option<TItem>
     val position: Int
     val line: Int
     val column: Int
-}
-
-interface INExt<out TInput:Any>{
-    fun next(): TInput
+    fun next(): TIn
 }

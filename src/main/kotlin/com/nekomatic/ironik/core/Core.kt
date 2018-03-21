@@ -2,14 +2,14 @@ package com.nekomatic.ironik.core
 
 import com.nekomatic.types.Option
 
-typealias fragmentParser<TStreamItem, TInput> = (TInput) -> ParserResult<TStreamItem, TInput>
+typealias fragmentParser<TItem, TIn, TStr, TF> = (TIn) -> ParserResult<TItem, TIn, TStr, TF>
 
-fun <TStreamItem : Any, TInput : IInput<TStreamItem>> createParser(match: (TStreamItem) -> Boolean): fragmentParser<TStreamItem, TInput> =
+fun <TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>> createParser(match: (TItem) -> Boolean): fragmentParser<TItem, TIn, TStr, TF> =
 
-        fun(input: TInput): ParserResult<TStreamItem, TInput> {
-            val currentItem: Option<TStreamItem> = input.item
+        fun(input: TIn): ParserResult<TItem, TIn, TStr, TF> {
+            val currentItem: Option<TItem> = input.item
             return when (currentItem) {
-                Option.None -> ParserResult.Failure<TStreamItem, TInput>(
+                Option.None -> ParserResult.Failure<TItem, TIn, TStr, TF>(
                         position = input.position,
                         column = input.column,
                         line = input.line
@@ -17,8 +17,8 @@ fun <TStreamItem : Any, TInput : IInput<TStreamItem>> createParser(match: (TStre
                 is Option.Some -> {
                     val current = currentItem.value
                     if (match(current)) {
-                        val remaining:TInput = input.next()
-                        ParserResult.Success<TStreamItem, TInput>(
+                        val remaining: TIn = input.next()
+                        ParserResult.Success<TItem, TIn, TStr, TF>(
                                 remainingInput = remaining,
                                 payload = listOf(current),
                                 position = input.position,
@@ -26,7 +26,7 @@ fun <TStreamItem : Any, TInput : IInput<TStreamItem>> createParser(match: (TStre
                                 line = input.line
                         )
                     } else
-                        ParserResult.Failure<TStreamItem, TInput>(
+                        ParserResult.Failure<TItem, TIn, TStr, TF>(
                                 position = input.position,
                                 column = input.column,
                                 line = input.line
@@ -35,12 +35,12 @@ fun <TStreamItem : Any, TInput : IInput<TStreamItem>> createParser(match: (TStre
             }
         }
 
-fun <TStreamItem : Any, TInput : IInput<TStreamItem>> createParser(match: TStreamItem): fragmentParser<TStreamItem, TInput> =
+fun <TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>> createParser(match: TItem): fragmentParser<TItem, TIn, TStr, TF> =
 
-        fun(input: TInput): ParserResult<TStreamItem, TInput> {
-            val currentItem: Option<TStreamItem> = input.item
+        fun(input: TIn): ParserResult<TItem, TIn, TStr, TF> {
+            val currentItem: Option<TItem> = input.item
             return when (currentItem) {
-                Option.None -> ParserResult.Failure<TStreamItem, TInput>(
+                Option.None -> ParserResult.Failure<TItem, TIn, TStr, TF>(
                         position = input.position,
                         column = input.column,
                         line = input.line
@@ -49,7 +49,7 @@ fun <TStreamItem : Any, TInput : IInput<TStreamItem>> createParser(match: TStrea
                     val current = currentItem.value
                     if (current == match) {
                         val remaining = input.next()
-                        ParserResult.Success<TStreamItem, TInput>(
+                        ParserResult.Success<TItem, TIn, TStr, TF>(
                                 remainingInput = remaining,
                                 payload = listOf(current),
                                 position = input.position,
@@ -57,7 +57,7 @@ fun <TStreamItem : Any, TInput : IInput<TStreamItem>> createParser(match: TStrea
                                 line = input.line
                         )
                     } else
-                        ParserResult.Failure<TStreamItem, TInput>(
+                        ParserResult.Failure<TItem, TIn, TStr, TF>(
                                 position = input.position,
                                 column = input.column,
                                 line = input.line
@@ -67,13 +67,13 @@ fun <TStreamItem : Any, TInput : IInput<TStreamItem>> createParser(match: TStrea
         }
 
 
-fun <TStreamItem : Any, TInput : IInput<TStreamItem>> ParserResult<TStreamItem, TInput>.chainResults(parser: fragmentParser<TStreamItem, TInput> ) =
+fun <TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>> ParserResult<TItem, TIn, TStr, TF>.chainResults(parser: fragmentParser<TItem, TIn, TStr, TF>) =
         when (this) {
             is ParserResult.Failure -> this
             is ParserResult.Success -> {
                 val result = parser(this.remainingInput)
                 when (result) {
-                    is ParserResult.Success -> ParserResult.Success<TStreamItem, TInput>(
+                    is ParserResult.Success -> ParserResult.Success<TItem, TIn, TStr, TF>(
                             remainingInput = result.remainingInput,
                             payload = this.payload + result.payload,
                             position = this.position,

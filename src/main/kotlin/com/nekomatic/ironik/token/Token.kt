@@ -24,48 +24,63 @@
 
 package com.nekomatic.ironik.token
 
-import com.nekomatic.ironik.core.IInput
+import com.nekomatic.ironik.core.InputBase
+import com.nekomatic.ironik.core.InputFactory
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.fragmentParser
 import com.nekomatic.types.Option
 
 
-class TokenMatcher<TStreamItem : Any, TInput : IInput<TStreamItem>>() {
-    fun <T:Token<TStreamItem,TInput>,TF : TokenFactory<TStreamItem, TInput,T>> match(tokenFactory: TF, input: TInput): Pair<Option<T>, TInput> {
+class TokenMatcher<TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>>() {
+    fun <T : Token<TItem, TIn, TStr, TF>, TF : TokenFactory<TItem, TIn, TStr, TF, T>> match(tokenFactory: TF, input: TIn): Pair<Option<T>, TIn> {
         val r = tokenFactory.rule(input)
         return when (r) {
-            is ParserResult.Success -> Pair(Option.Some(tokenFactory.createToken(r.payload)), r.remainingInput)
+            is ParserResult.Success -> Pair(
+                    Option.Some(tokenFactory.createToken(
+                            payload = r.payload,
+                            location = Location(
+                                    index = r.position,
+                                    length = r.payload.count(),
+                                    column = r.column,
+                                    line = r.line
+                            )
+                    )),
+                    r.remainingInput
+            )
             is ParserResult.Failure -> Pair(Option.None, input)
-
         }
-
     }
 }
 
-abstract class TokenFactory<TStreamItem : Any, TInput : IInput<TStreamItem>, T:Token<TStreamItem,TInput>>(val name: String) {
-    abstract val rule: fragmentParser<TStreamItem, TInput>
-    abstract fun createToken(payload:List<TStreamItem>) :T
+abstract class TokenFactory<TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>, out T : Token<TItem, TIn, TStr, TF>>(val name: String) {
+    abstract val rule: fragmentParser<TItem, TIn, TStr, TF>
+    abstract fun createToken(payload: List<TItem>, location: Location): T
+
 }
 
-abstract class Token<TStreamItem : Any, TInput : IInput<TStreamItem>>(val name: String, val payload:List<TStreamItem>)
+abstract class Token<TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>>(
+        val name: String,
+        val payload: List<TItem>,
+        val location: Location
+)
 
-sealed class TokenResult<out T : Any, out TStreamItem : Any>(open val name: String) {
+sealed class TokenResult<out T : Any, TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>>(open val name: String) {
 
-    data class Success<out T : Any, TStreamItem : Any>(
+    data class Success<out T : Any, TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>>(
             override val name: String,
-            val value: List<TStreamItem>,
-            val remainingInput: IInput<TStreamItem>,
-            val payload: List<TStreamItem>,
-            val position: Position
-    ) : TokenResult<T, TStreamItem>(name)
+            val value: List<TItem>,
+            val remainingInput: TIn,
+            val payload: List<TItem>,
+            val location: Location
+    ) : TokenResult<T, TItem, TIn, TStr, TF>(name)
 
-    data class Failure<out TStreamItem : Any>(
+    data class Failure<TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>>(
             override val name: String,
             val at: Int
-    ) : TokenResult<Nothing, TStreamItem>(name)
+    ) : TokenResult<Nothing, TItem, TIn, TStr, TF>(name)
 }
 
-class Position(
+class Location(
         val index: Int,
         val length: Int,
         val column: Int = 0,

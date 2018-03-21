@@ -24,9 +24,10 @@
 
 package com.nekomatic.ironik.core.fragment
 
-import com.nekomatic.ironik.core.IInput
+import com.nekomatic.ironik.core.InputFactory
+import com.nekomatic.ironik.core.InputBase
 import com.nekomatic.ironik.core.fragmentParser
 
-fun <TStreamItem : Any, TInput : IInput<TStreamItem>> List<fragmentParser<TStreamItem, TInput>>.sequence() = sequenceOf(*(this.toTypedArray()))
-fun <TStreamItem : Any, TInput : IInput<TStreamItem>> fragmentParser<TStreamItem, TInput>.starRule() = zeroOrMore(this)
-fun <TStreamItem : Any, TInput : IInput<TStreamItem>> fragmentParser<TStreamItem, TInput>.plusRule() = oneOrMore(this)
+fun <TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>> List<fragmentParser<TItem, TIn, TStr, TF>>.sequence() = sequenceOf(*(this.toTypedArray()))
+fun <TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>> fragmentParser<TItem, TIn, TStr, TF>.starRule() = zeroOrMore(this)
+fun <TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>> fragmentParser<TItem, TIn, TStr, TF>.plusRule() = oneOrMore(this)

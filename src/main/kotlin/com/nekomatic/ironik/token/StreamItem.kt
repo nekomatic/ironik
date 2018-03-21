@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 
-package com.nekomatic.ironik.core
+package com.nekomatic.ironik.token
 
 sealed class StreamItem<out TStreamElement : Any> {
     sealed class End<out TStreamElement : Any>{
         object OfLine : End<Nothing>()
         object OfFile : End<Nothing>()
     }
-    data class Some<out TStreamItem : Any>(val value: TStreamItem) : StreamItem<TStreamItem>()
+    data class Some<out TItem : Any>(val value: TItem) : StreamItem<TItem>()
 }

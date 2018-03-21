@@ -24,18 +24,23 @@
 
 package com.nekomatic.ironik.core
 
-sealed class ParserResult<TStreamItem : Any, TInput : IInput<TStreamItem>>(val position: Int, val column: Int, val line: Int, val success: Boolean) {
-    class Success<TStreamItem : Any, TInput : IInput<TStreamItem>>(
-            val remainingInput: TInput,
-            val payload: List<TStreamItem>,
+sealed class ParserResult<TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>>(
+        val position: Int,
+        val column: Int,
+        val line: Int,
+        val success: Boolean
+) {
+    class Success<TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>>(
+            val remainingInput: TIn,
+            val payload: List<TItem>,
             position: Int,
             column: Int,
             line: Int
-    ) : ParserResult<TStreamItem, TInput>(position, column, line, true)
+    ) : ParserResult<TItem, TIn, TStr, TF>(position, column, line, true)
 
-    class Failure<TStreamItem : Any, TInput : IInput<TStreamItem>>(
+    class Failure<TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>>(
             position: Int,
             column: Int,
             line: Int
-    ) : ParserResult<TStreamItem, TInput>(position, column, line, false)
+    ) : ParserResult<TItem, TIn, TStr, TF>(position, column, line, false)
 }

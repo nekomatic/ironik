@@ -1,10 +1,11 @@
 package com.nekomatic.ironik.core.fragment
 
-import com.nekomatic.ironik.core.IInput
+import com.nekomatic.ironik.core.InputFactory
+import com.nekomatic.ironik.core.InputBase
 import com.nekomatic.ironik.core.fragmentParser
 
-infix fun <TStreamItem : Any, TInput : IInput<TStreamItem>> fragmentParser<TStreamItem, TInput>.surroundedBy(that: fragmentParser<TStreamItem, TInput>): fragmentParser<TStreamItem, TInput> =
+infix fun <TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>> fragmentParser<TItem, TIn, TStr, TF>.surroundedBy(that: fragmentParser<TItem, TIn, TStr, TF>): fragmentParser<TItem, TIn, TStr, TF> =
         that consumeThen this thenConsume that
 
-fun <TStreamItem : Any, TInput : IInput<TStreamItem>> fragmentParser<TStreamItem, TInput>.surroundedBy(left: fragmentParser<TStreamItem, TInput>, right: fragmentParser<TStreamItem, TInput>): fragmentParser<TStreamItem, TInput> =
-    left consumeThen this thenConsume right
+fun <TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>> fragmentParser<TItem, TIn, TStr, TF>.surroundedBy(left: fragmentParser<TItem, TIn, TStr, TF>, right: fragmentParser<TItem, TIn, TStr, TF>): fragmentParser<TItem, TIn, TStr, TF> =
+        left consumeThen this thenConsume right

@@ -25,27 +25,60 @@
 
 package com.nekomatic.ironik.charparser
 
-import com.nekomatic.ironik.core.InputWithLines
+import com.nekomatic.ironik.core.InputFactory
+import com.nekomatic.ironik.core.InputBase
 
+
+class CharInputFactory() : InputFactory<Char, CharInput, CharSequence, CharInputFactory>() {
+
+    override fun wrap(input: InputBase<Char, CharInput, CharSequence, CharInputFactory>, factory: CharInputFactory): CharInput {
+        return input as CharInput
+    }
+
+    override fun create(
+            stream: CharSequence,
+            eolTestParser: (stream: CharSequence, currentIndex: Int, lastKnown: Int) -> Int,
+            itemAtIndex: (stream: CharSequence, currentIndex: Int) -> Char,
+            isPastEnd: (input: CharSequence, currentIndex: Int) -> Boolean,
+            index: Int,
+            l: Int,
+            c: Int,
+            lastKnownEolIndex: Int,
+            factory: CharInputFactory
+    ): CharInput =
+            CharInput(
+                    charStream = stream,
+                    eolTestParser = eolTestParser,
+                    itemAtIndex = itemAtIndex,
+                    isPastEnd = isPastEnd,
+                    index = index,
+                    l = l,
+                    c = c,
+                    lastKnownEolIndex = lastKnownEolIndex,
+                    factory = factory
+            )
+}
 
 class CharInput(
-        private val charSequence: CharSequence,
+        private val charStream: CharSequence,
         private val eolTestParser: (stream: CharSequence, currentIndex: Int, lastKnown: Int) -> Int,
         private val itemAtIndex: (stream: CharSequence, currentIndex: Int) -> Char,
         private val isPastEnd: (input: CharSequence, currentIndex: Int) -> Boolean,
         private val index: Int = 0,
         private val l: Int = 1,
         private val c: Int = 1,
-        private val lastKnownEolIndex: Int = -1
-) : InputWithLines<Char, CharInput, CharSequence>(
-        stream = charSequence,
-        nextEolIndexFinder = eolTestParser,
+        private val lastKnownEolIndex: Int = -1,
+        private val factory: CharInputFactory
+) : InputBase<Char, CharInput, CharSequence, CharInputFactory>(
+        stream = charStream,
+        eolTestParser = eolTestParser,
         itemAtIndex = itemAtIndex,
         isPastEnd = isPastEnd,
         index = index,
         l = l,
         c = c,
-        lastKnownEolIndex = lastKnownEolIndex
+        lastKnownEolIndex = lastKnownEolIndex,
+        inputFactory = factory
 ) {
     companion object {
 
@@ -79,10 +112,11 @@ class CharInput(
             val isPastEnd = { s: CharSequence, i: Int -> i >= s.length }
             val eolTestParser = { s: CharSequence, i: Int, lastKnown: Int -> eolIndexFinder(s, i, lastKnown, itemAtIndex, isPastEnd) }
             return CharInput(
-                    charSequence = input,
+                    charStream = input,
                     eolTestParser = eolTestParser,
                     itemAtIndex = itemAtIndex,
-                    isPastEnd = isPastEnd
+                    isPastEnd = isPastEnd,
+                    factory = CharInputFactory()
             )
         }
     }

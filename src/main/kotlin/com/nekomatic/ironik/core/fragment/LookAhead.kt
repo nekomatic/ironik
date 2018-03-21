@@ -1,12 +1,13 @@
 package com.nekomatic.ironik.core.fragment
 
-import com.nekomatic.ironik.core.IInput
+import com.nekomatic.ironik.core.InputFactory
+import com.nekomatic.ironik.core.InputBase
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.fragmentParser
 
-fun <TStreamItem : Any, TInput : IInput<TStreamItem>> fragmentParser<TStreamItem, TInput>.lookAhead(): fragmentParser<TStreamItem, TInput> =
+fun <TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>> fragmentParser<TItem, TIn, TStr, TF>.lookAhead(): fragmentParser<TItem, TIn, TStr, TF> =
 
-        fun(input: TInput): ParserResult<TStreamItem, TInput> {
+        fun(input: TIn): ParserResult<TItem, TIn, TStr, TF> {
             val thisResult = this(input)
             return when (thisResult) {
                 is ParserResult.Failure -> ParserResult.Failure(
@@ -14,7 +15,7 @@ fun <TStreamItem : Any, TInput : IInput<TStreamItem>> fragmentParser<TStreamItem
                         column = input.column,
                         line = input.line
                 )
-                is ParserResult.Success -> ParserResult.Success<TStreamItem, TInput>(
+                is ParserResult.Success -> ParserResult.Success<TItem, TIn, TStr, TF>(
                         remainingInput = input,
                         payload = listOf(),
                         position = input.position,

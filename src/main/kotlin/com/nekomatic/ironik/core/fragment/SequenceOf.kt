@@ -24,16 +24,17 @@
 
 package com.nekomatic.ironik.core.fragment
 
-import com.nekomatic.ironik.core.IInput
+import com.nekomatic.ironik.core.InputFactory
+import com.nekomatic.ironik.core.InputBase
 import com.nekomatic.ironik.core.ParserResult
 import com.nekomatic.ironik.core.fragmentParser
 import com.nekomatic.types.PositiveInt
 
-fun <TStreamItem : Any, TInput : IInput<TStreamItem>> sequenceOf(vararg tokenParsers: fragmentParser<TStreamItem, TInput>): fragmentParser<TStreamItem, TInput> =
+fun <TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>> sequenceOf(vararg tokenParsers: fragmentParser<TItem, TIn, TStr, TF>): fragmentParser<TItem, TIn, TStr, TF> =
 
-        fun(input: TInput): ParserResult<TStreamItem, TInput> {
+        fun(input: TIn): ParserResult<TItem, TIn, TStr, TF> {
             val iterator = tokenParsers.iterator()
-            tailrec fun parseNext(currentInput: TInput, accumulatorList: List<ParserResult.Success<TStreamItem, TInput>> = listOf()): ParserResult<TStreamItem, TInput> {
+            tailrec fun parseNext(currentInput: TIn, accumulatorList: List<ParserResult.Success<TItem, TIn, TStr, TF>> = listOf()): ParserResult<TItem, TIn, TStr, TF> {
                 return if (iterator.hasNext()) {
                     val result = iterator.next()(currentInput)
                     when (result) {
@@ -53,17 +54,17 @@ fun <TStreamItem : Any, TInput : IInput<TStreamItem>> sequenceOf(vararg tokenPar
         }
 
 
-fun <TStreamItem : Any, TInput : IInput<TStreamItem>> numberOf(parser: fragmentParser<TStreamItem, TInput>, count: PositiveInt) =
+fun <TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>> numberOf(parser: fragmentParser<TItem, TIn, TStr, TF>, count: PositiveInt) =
         sequenceOf(*Array(count.value, { parser }))
 
-fun <TStreamItem : Any, TInput : IInput<TStreamItem>> fragmentParser<TStreamItem, TInput>.count(count: PositiveInt) =
+fun <TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>> fragmentParser<TItem, TIn, TStr, TF>.count(count: PositiveInt) =
         numberOf(this, count)
 
-fun <TStreamItem : Any, TInput : IInput<TStreamItem>> twoOf(parser: fragmentParser<TStreamItem, TInput>) =
+fun <TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>> twoOf(parser: fragmentParser<TItem, TIn, TStr, TF>) =
         sequenceOf(*Array(2, { parser }))
 
-fun <TStreamItem : Any, TInput : IInput<TStreamItem>> threeOf(parser: fragmentParser<TStreamItem, TInput>) =
+fun <TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>> threeOf(parser: fragmentParser<TItem, TIn, TStr, TF>) =
         sequenceOf(*Array(3, { parser }))
 
-fun <TStreamItem : Any, TInput : IInput<TStreamItem>> fourOf(parser: fragmentParser<TStreamItem, TInput>) =
+fun <TItem : Any, TIn : InputBase<TItem, TIn, TStr, TF>, TStr : Any, TF : InputFactory<TItem, TIn, TStr, TF>> fourOf(parser: fragmentParser<TItem, TIn, TStr, TF>) =
         sequenceOf(*Array(4, { parser }))
