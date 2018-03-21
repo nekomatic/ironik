@@ -1,6 +1,6 @@
 package com.nekomatic.ironik.charparser
 
-import com.nekomatic.ironik.core.combinators.then
+import com.nekomatic.ironik.core.fragment.then
 import org.junit.jupiter.api.Test
 
 class CharInputTests {

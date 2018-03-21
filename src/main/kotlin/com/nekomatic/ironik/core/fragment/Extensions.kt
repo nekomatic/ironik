@@ -22,25 +22,11 @@
  * SOFTWARE.
  */
 
-package com.nekomatic.ironik.core.combinators
+package com.nekomatic.ironik.core.fragment
 
 import com.nekomatic.ironik.core.IInput
-import com.nekomatic.ironik.core.IParser
-import com.nekomatic.ironik.core.ParserResult
-import com.nekomatic.ironik.core.parsers.Parser
+import com.nekomatic.ironik.core.fragmentParser
 
-infix fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<T, TStreamItem, TInput>.renameTo(newName: String): IParser<T, TStreamItem, TInput> =
-        Parser(
-                fun(input: IInput<TStreamItem>): ParserResult<T, TStreamItem, TInput> {
-                    val thisResult = this.parse(input)
-                    return when (thisResult) {
-                        is ParserResult.Failure -> ParserResult.Failure(
-                                expected = newName,
-                                position = input.position,
-                                column = input.column,
-                                line = input.line
-                        )
-                        is ParserResult.Success -> thisResult
-                    }
-                }
-        )
+fun <TStreamItem : Any, TInput : IInput<TStreamItem>> List<fragmentParser<TStreamItem, TInput>>.sequence() = sequenceOf(*(this.toTypedArray()))
+fun <TStreamItem : Any, TInput : IInput<TStreamItem>> fragmentParser<TStreamItem, TInput>.starRule() = zeroOrMore(this)
+fun <TStreamItem : Any, TInput : IInput<TStreamItem>> fragmentParser<TStreamItem, TInput>.plusRule() = oneOrMore(this)

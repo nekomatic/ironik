@@ -25,12 +25,11 @@
 package com.nekomatic.ironik.charparser
 
 import com.nekomatic.ironik.core.IInput
-import com.nekomatic.ironik.core.IParser
-import com.nekomatic.ironik.core.combinators.*
+import com.nekomatic.ironik.core.ITokenParser
+import com.nekomatic.ironik.core.fragment.*
 import com.nekomatic.types.Option
-import com.nekomatic.types.flatten
 
-class JsonParser() : IParser<Json, Char, CharInput> {
+class JsonParser() : ITokenParser<Json, Char, CharInput> {
     companion object {
         private val jsonParsers = JsonParsers()
         private val jTokenParser = oneOf("json value",
@@ -57,7 +56,7 @@ class JsonParsers() {
     internal val backSl by lazy { char('\\') }
 
     //TODO: change to direct Char from Hex value convestion using built in java
-    internal val fourDigitHex = fourOf(hexDigitAsInt) mapValue { it[3] + it[2] * 16 + (it[1] + it[0] * 16) * 256 }
+    internal val fourDigitHex = fourOf(HEX_DIGIT_AS_INT) mapValue { it[3] + it[2] * 16 + (it[1] + it[0] * 16) * 256 }
 
     internal val strUTF = fourDigitHex mapValue { it.toChar() } prefixedBy string("\\u")
     internal val strQ = quote prefixedBy char('\\') toConst ('"')
@@ -69,7 +68,7 @@ class JsonParsers() {
     internal val strRT = char('r') prefixedBy char('\\') toConst ('\r')
     internal val strT = char('t') prefixedBy char('\\') toConst ('\t')
     internal val zero = char('0') toConst listOf('0')
-    internal val nonZero = digit.onlyIfTrue("[1-9]") { it != '0' } mapValue { listOf(it) } then zeroOrMore(digit) mapValue { it.item01 + it.item02 }
+    internal val nonZero = DIGIT.onlyIfTrue("[1-9]") { it != '0' } mapValue { listOf(it) } then zeroOrMore(DIGIT) mapValue { it.item01 + it.item02 }
 
     internal val escaped = oneOf("escaped string character",
             strUTF,
@@ -84,9 +83,9 @@ class JsonParsers() {
     )
 
     internal val jStringChar = escaped.otherwise("string character", anyCharExcluding(quote.otherwise("unescaped string character", backSl)))
-    internal val jNumDiscreete: IParser<List<Char>, Char, CharInput> = zero.otherwise("0|[1-9][0-9]*", nonZero)
-    internal val jNumDotpart: IParser<List<Char>, Char, CharInput> = oneOrMore(digit).prefixedBy(char('.')) mapValue { listOf('.') + it }
-    internal val jNumEPart = option(char('+').otherwise("+|-", char('-'))) then (char('e').otherwise("e|E", char('E'))) then oneOrMore(digit) mapValue { it.flatten() } mapValue
+    internal val jNumDiscreete: ITokenParser<List<Char>, Char, CharInput> = zero.otherwise("0|[1-9][0-9]*", nonZero)
+    internal val jNumDotpart: ITokenParser<List<Char>, Char, CharInput> = oneOrMore(DIGIT).prefixedBy(char('.')) mapValue { listOf('.') + it }
+    internal val jNumEPart = option(char('+').otherwise("+|-", char('-'))) then (char('e').otherwise("e|E", char('E'))) then oneOrMore(DIGIT) mapValue { it.flatten() } mapValue
             {
                 (if (it.item01 is Option.Some) listOf((it.item01 as Option.Some<Char>).value)
                 else listOf()) +
@@ -106,29 +105,29 @@ class JsonParsers() {
                 }
     }
 
-    val jString: IParser<Json.String, Char, CharInput> =
+    val jString: ITokenParser<Json.String, Char, CharInput> =
             (string("\"\"")
                     .toConst(Json.String("")))
                     .otherwise("any sctring character", oneOrMore(jStringChar)
                             .surroundedBy(quote)
                             .mapValue { Json.String(it.joinToString("")) })
-    val jBool: IParser<Json.Bool, Char, CharInput> =
+    val jBool: ITokenParser<Json.Bool, Char, CharInput> =
             string("true")
                     .otherwise("true|false", string("false"))
                     .mapValue { if (it == "true") Json.Bool.True else Json.Bool.False }
 
     val jNumber = doubleOption.onlyIfSome("valid number") mapValue { Json.Number(it) }
-    val jNull: IParser<Json.Null, Char, CharInput> = string("null") mapValue { Json.Null }
+    val jNull: ITokenParser<Json.Null, Char, CharInput> = string("null") mapValue { Json.Null }
 
-    internal val emptyArray: IParser<Json.Array, Char, CharInput> = (lSqBr then rSqBr).toConst(Json.Array(listOf()))
-    internal val nonEmptyArray: IParser<Json.Array, Char, CharInput> = (JsonParser() listOfSeparatedBy coma) suffixedBy rSqBr prefixedBy lSqBr mapValue { Json.Array(it) }
+    internal val emptyArray: ITokenParser<Json.Array, Char, CharInput> = (lSqBr then rSqBr).toConst(Json.Array(listOf()))
+    internal val nonEmptyArray: ITokenParser<Json.Array, Char, CharInput> = (JsonParser() listOfSeparatedBy coma) suffixedBy rSqBr prefixedBy lSqBr mapValue { Json.Array(it) }
 
-    val jArray: IParser<Json.Array, Char, CharInput> = nonEmptyArray.otherwise("json array", emptyArray)
+    val jArray: ITokenParser<Json.Array, Char, CharInput> = nonEmptyArray.otherwise("json array", emptyArray)
 
-    internal val jProperty: IParser<Json.Property, Char, CharInput> = (jString suffixedBy colon) then JsonParser() mapValue { Json.Property(name = it.item01, value = it.item02) }
-    internal val emptyObject: IParser<Json.Object, Char, CharInput> = (lCrBr then rCrBr).toConst(Json.Object(listOf()))
-    internal val nonEmptyObject: IParser<Json.Object, Char, CharInput> = ((jProperty.listOfSeparatedBy(coma)).suffixedBy(rCrBr) prefixedBy lCrBr).mapValue { Json.Object(it) }
+    internal val jProperty: ITokenParser<Json.Property, Char, CharInput> = (jString suffixedBy colon) then JsonParser() mapValue { Json.Property(name = it.item01, value = it.item02) }
+    internal val emptyObject: ITokenParser<Json.Object, Char, CharInput> = (lCrBr then rCrBr).toConst(Json.Object(listOf()))
+    internal val nonEmptyObject: ITokenParser<Json.Object, Char, CharInput> = ((jProperty.listOfSeparatedBy(coma)).suffixedBy(rCrBr) prefixedBy lCrBr).mapValue { Json.Object(it) }
 
-    val jObject: IParser<Json.Object, Char, CharInput> = emptyObject.otherwise("json object", nonEmptyObject)
+    val jObject: ITokenParser<Json.Object, Char, CharInput> = emptyObject.otherwise("json object", nonEmptyObject)
 
 }

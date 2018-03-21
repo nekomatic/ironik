@@ -22,12 +22,8 @@
  * SOFTWARE.
  */
 
-package com.nekomatic.ironik.core.combinators
+package com.nekomatic.ironik.core
 
-import com.nekomatic.ironik.core.IInput
-import com.nekomatic.ironik.core.IParser
-
-fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> List<IParser<T, TStreamItem, TInput>>.sequence() = sequenceOf(*(this.toTypedArray()))
-fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<T, TStreamItem, TInput>.starRule() = zeroOrMore(this)
-fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<T, TStreamItem, TInput>.plusRule() = oneOrMore(this)
-fun <T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>> IParser<T, TStreamItem, TInput>.optional() = option(this)
+interface ITokenParser<TStreamItem : Any, TInput : IInput<TStreamItem>> {
+    fun parse(input: IInput<TStreamItem>): ParserResult<TStreamItem, TInput>
+}

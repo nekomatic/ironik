@@ -17,7 +17,7 @@
     <packaging>jar</packaging>
 
     <name>Nekomatic Ironik</name>
-    <description>Another simple parser combinator library for Kotlin</description>
+    <description>Another simple tokenParser combinator library for Kotlin</description>
     <url>https://github.com/nekomatic/ironik</url>
 
     <licenses>

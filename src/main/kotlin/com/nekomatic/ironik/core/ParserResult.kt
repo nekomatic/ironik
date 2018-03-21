@@ -24,20 +24,18 @@
 
 package com.nekomatic.ironik.core
 
-sealed class ParserResult<out T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>>() {
-    data class Success<out T : Any, TStreamItem : Any, TInput : IInput<TStreamItem>>(
-            val value: T,
-            val remainingInput: IInput<TStreamItem>,
+sealed class ParserResult<TStreamItem : Any, TInput : IInput<TStreamItem>>(val position: Int, val column: Int, val line: Int, val success: Boolean) {
+    class Success<TStreamItem : Any, TInput : IInput<TStreamItem>>(
+            val remainingInput: TInput,
             val payload: List<TStreamItem>,
-            val position: Int,
-            val column:Int,
-            val line:Int
-    ) : ParserResult<T, TStreamItem, TInput>()
+            position: Int,
+            column: Int,
+            line: Int
+    ) : ParserResult<TStreamItem, TInput>(position, column, line, true)
 
-    data class Failure<TStreamItem : Any, TInput : IInput<TStreamItem>>(
-            val expected: String,
-            val position: Int,
-            val column:Int,
-            val line:Int
-    ) : ParserResult<Nothing, TStreamItem, TInput>()
+    class Failure<TStreamItem : Any, TInput : IInput<TStreamItem>>(
+            position: Int,
+            column: Int,
+            line: Int
+    ) : ParserResult<TStreamItem, TInput>(position, column, line, false)
 }

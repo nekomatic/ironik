@@ -25,40 +25,33 @@
 
 package com.nekomatic.ironik.charparser
 
-import com.nekomatic.ironik.core.IInput
-import com.nekomatic.ironik.core.IParser
-import com.nekomatic.ironik.core.combinators.*
 import com.nekomatic.ironik.core.createParser
+import com.nekomatic.ironik.core.fragment.*
+import com.nekomatic.ironik.core.fragmentParser
 
-fun createCharParser(expected: String, match: (Char) -> Boolean): IParser<Char, Char, CharInput> = createParser(expected, match)
+fun createCharParser(match: (Char) -> Boolean): fragmentParser<Char, CharInput> = createParser(match)
+fun createCharParser(match: Char): fragmentParser<Char, CharInput> = createParser(match)
 
-fun char(char: Char): IParser<Char, Char, CharInput> = createCharParser(char.toString()) { c -> c == char }
-fun <T : Any> anyCharExcluding(parser: IParser<T, Char, CharInput>): IParser<Char, Char, CharInput> = anythingBut(parser)
-fun <T : Any> IParser<T, Char, CharInput>.token(): IParser<T, Char, CharInput> = this surroundedBy optionalWhitespaces
-fun string(value: String) =//: IParser<String, Char, CharInput> =
+fun char(char: Char): fragmentParser<Char, CharInput> = createCharParser(char)
+fun anyCharExcluding(parser: fragmentParser<Char, CharInput>): fragmentParser<Char, CharInput> = not(parser)
+
+fun string(value: String) =
         value.toList()
                 .map { char(it) }
                 .sequence()
-                .renameTo(value)
-                .mapValue { it.joinToString("")
-                }
 
-
-val digit by lazy { createCharParser("[0-9]", { it.isDigit() }) }
-val lowercase by lazy { createCharParser("[a-z]", { it.isLowerCase() }) }
-val uppercase by lazy { createCharParser("[A-Z]", { it.isUpperCase() }) }
-val letter by lazy { createCharParser("[a-zA-Z]", { it.isLetter() }) }
-val letterOrDigit by lazy { createCharParser("[a-zA-Z0-9]", { it.isLetterOrDigit() }) }
-val whitespace by lazy { createCharParser("whitespace") { it.isWhitespace() } }
-
-
-val whitespaces: IParser<List<Char>, Char,CharInput> by lazy { whitespace.plusRule() }
-val optionalWhitespaces: IParser<List<Char>, Char,CharInput>by lazy { whitespace.starRule() }
-//TODO: replace with more elegant and efficient implementation
-val hexDigitAsInt: IParser<Int, Char,CharInput> = createCharParser("[a-fA-F0-9]") { "0123456789abcdef".contains(it, true) } mapValue { "0123456789abcdef".indexOf(it, 0, true) }
-
-val eol = oneOf("eol",
-        (char('\r') then (char('\n'))),
+val DIGIT = createCharParser({ it.isDigit() })
+val LOWERCASE_CHAR = createCharParser({ it.isLowerCase() })
+val UPPERCASE_CHAR = createCharParser({ it.isUpperCase() })
+val LETTER = createCharParser({ it.isLetter() })
+val LETTER_OR_DIGIT = createCharParser({ it.isLetterOrDigit() })
+val WHITESPACE = createCharParser { it.isWhitespace() }
+val WHITESPACES = oneOrMore(WHITESPACE)
+val OPTIONAL_WHITESPACES: fragmentParser<Char, CharInput> = zeroOrMore(WHITESPACE)
+val HEX_DIGIT = oneOf(*("0123456789abcdefABCDEF".toList().map { char(it) }.toTypedArray()))
+val EOL = oneOf(
+        (char('\r') join (char('\n'))),
         char('\n'),
         char('\r')
-) toConst ('\n')
+)
+fun fragmentParser<Char, CharInput>.token(): fragmentParser<Char, CharInput> = this.surroundedBy(OPTIONAL_WHITESPACES)

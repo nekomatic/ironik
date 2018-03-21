@@ -25,33 +25,49 @@
 package com.nekomatic.ironik.token
 
 import com.nekomatic.ironik.core.IInput
-import com.nekomatic.ironik.core.IParser
+import com.nekomatic.ironik.core.ParserResult
+import com.nekomatic.ironik.core.fragmentParser
+import com.nekomatic.types.Option
 
 
-//class Token<TStreamItem : Any>(val name: String, val parser: IParser<TStreamItem, TStreamItem>) {
-//
-//}
-//
-//
-//sealed class TokenResult<out T : Any, out TStreamItem : Any>(open val name: String) {
-//
-//    data class Success<out T : Any, TStreamItem : Any>(
-//            override val name: String,
-//            val value: List<TStreamItem>,
-//            val remainingInput: IInput<TStreamItem>,
-//            val payload: List<TStreamItem>,
-//            val position: Position
-//    ) : TokenResult<T, TStreamItem>(name)
-//
-//    data class Failure<out TStreamItem : Any>(
-//            override val name: String,
-//            val at: Int
-//    ) : TokenResult<Nothing, TStreamItem>(name)
-//}
-//
-//class Position(
-//        val index: Int,
-//        val length: Int,
-//        val column: Int = 0,
-//        val line: Int = 0
-//)
+class TokenMatcher<TStreamItem : Any, TInput : IInput<TStreamItem>>() {
+    fun <T:Token<TStreamItem,TInput>,TF : TokenFactory<TStreamItem, TInput,T>> match(tokenFactory: TF, input: TInput): Pair<Option<T>, TInput> {
+        val r = tokenFactory.rule(input)
+        return when (r) {
+            is ParserResult.Success -> Pair(Option.Some(tokenFactory.createToken(r.payload)), r.remainingInput)
+            is ParserResult.Failure -> Pair(Option.None, input)
+
+        }
+
+    }
+}
+
+abstract class TokenFactory<TStreamItem : Any, TInput : IInput<TStreamItem>, T:Token<TStreamItem,TInput>>(val name: String) {
+    abstract val rule: fragmentParser<TStreamItem, TInput>
+    abstract fun createToken(payload:List<TStreamItem>) :T
+}
+
+abstract class Token<TStreamItem : Any, TInput : IInput<TStreamItem>>(val name: String, val payload:List<TStreamItem>)
+
+sealed class TokenResult<out T : Any, out TStreamItem : Any>(open val name: String) {
+
+    data class Success<out T : Any, TStreamItem : Any>(
+            override val name: String,
+            val value: List<TStreamItem>,
+            val remainingInput: IInput<TStreamItem>,
+            val payload: List<TStreamItem>,
+            val position: Position
+    ) : TokenResult<T, TStreamItem>(name)
+
+    data class Failure<out TStreamItem : Any>(
+            override val name: String,
+            val at: Int
+    ) : TokenResult<Nothing, TStreamItem>(name)
+}
+
+class Position(
+        val index: Int,
+        val length: Int,
+        val column: Int = 0,
+        val line: Int = 0
+)

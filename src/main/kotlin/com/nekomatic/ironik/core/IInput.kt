@@ -34,6 +34,6 @@ interface IInput<TStreamItem:Any> :INExt<IInput<TStreamItem>> {
     val column: Int
 }
 
-interface INExt<out T:Any>{
-    fun next(): T
+interface INExt<out TInput:Any>{
+    fun next(): TInput
 }

@@ -1,19 +1,19 @@
 package com.nekomatic.ironik.charparser
 
-import com.nekomatic.ironik.core.IParser
+import com.nekomatic.ironik.core.ITokenParser
 import com.nekomatic.ironik.core.ParserResult
 import org.junit.jupiter.api.Test
 
 class JsonParserTests {
 
-    fun <T : Any> parse(str: String, parser: IParser<T, Char, CharInput>): ParserResult<T, Char, CharInput> {
+    fun <T : Any> parse(str: String, tokenParser: ITokenParser<T, Char, CharInput>): ParserResult<T, Char, CharInput> {
         val input = CharInput.create(str)
-        val result = parser.parse(input)
+        val result = tokenParser.parse(input)
         return result
     }
 
-    fun <T : Any> assertMany(m: Map<String, Boolean>, parser: IParser<T, Char, CharInput>) {
-        assert(m.map { (parse(it.key, parser) is ParserResult.Success) == it.value }.reduce { a, b -> a && b })
+    fun <T : Any> assertMany(m: Map<String, Boolean>, tokenParser: ITokenParser<T, Char, CharInput>) {
+        assert(m.map { (parse(it.key, tokenParser) is ParserResult.Success) == it.value }.reduce { a, b -> a && b })
     }
 
 
